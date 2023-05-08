@@ -1,0 +1,228 @@
+\documentclass[]{beamer}
+
+
+%\usetheme{Darmstadt}
+ 
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+
+\usepackage{multirow}
+%\usefonttheme{default} % default family is serif
+%\usepackage{fontspec}
+%\setmainfont{Liberation Serif}
+
+
+\usepackage{amsmath, amssymb}
+%\usepackage{varwidth}% http://ctan.org/pkg/varwidth
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{tikz}
+
+\usepackage{breqn}
+
+\usetikzlibrary{calc,tikzmark,arrows,shapes,backgrounds}
+%\usetikzlibrary{positioning, fit, arrows.meta, shapes}
+\usetikzlibrary{fit, arrows.meta, shapes}
+
+% used to avoid putting the same thing several times...
+% Command \empt{var1}{var2}
+%\newcommand{\empt}[2]{$#1^{\langle #2 \rangle}$}
+\newcommand{\empt}[2]{$#1^{( #2 )}$}
+
+
+
+\setbeamertemplate{footline}[frame number]
+%%\setbeamertemplate{headline}{Magister en estadística - PUCV}
+ 
+
+\usetikzlibrary{arrows.meta}
+
+
+
+\title{Modelos Lineales para Clasificación}
+\subtitle{Modelos para Respuesta Ordinal}
+\author{Juan Zamora O.}
+%\institute{Pontificia Universidad Católica de Valparaíso}
+\date{}
+
+
+%%% LOGO DE LA PAGINA INICIAL
+\titlegraphic{
+	\begin{tikzpicture}[overlay,remember picture]
+		\node[opacity=0.8,below=0.3cm] at (current page.center){		
+    			\includegraphics[width=4cm]{logo_ies}
+		};
+	\end{tikzpicture}
+}
+%%% END OF LOGO
+
+
+
+
+%%% LOGO DE CADA LAMINA
+\logo{
+	\begin{tikzpicture}[overlay,remember picture]
+		\node[opacity=0.4,right=1.2cm, above=0.12cm] at (current page.south west){		
+    			\includegraphics[width=2cm]{logo_ies}
+		};
+	\end{tikzpicture}
+}
+%%% END OF LOGO
+
+
+
+\begin{document}
+
+\begin{frame}[noframenumbering,plain]
+    \titlepage
+\end{frame}
+
+\begin{frame}{Modelos con respuestas ordinales}
+	En esta parte del Curso, revisaremos problemas en que las categorias 
+	de la respuesta en el problema de regresión están ordenadas\\~\ 
+	
+	Modelos en donde 
+	Las respuestas tienden a tomar cateogrías más altas o más bajas a 
+	medida que el valor de una covariable se incrementa\\~\
+
+	Es posible explotar información del ordenamiento natural de las 
+	categorías y así obtener un modelo más parsimonioso que el multinomial
+\end{frame}
+
+\begin{frame}{Modelos con respuestas ordinales}{Errores de modelamiento comúnes }
+	Uso de modelos clásicos ignorando que la respuesta es ordinal. Esto genera 
+	una interpretación deficiente de los resultados.\\~\ 
+
+	Otra manera de abordar este tipo de problemas es mediante el uso de 
+	regresión binaria sobre una varsión colapsada de las categorías. El 
+	problema en este caso es la pérdida de información.
+
+\end{frame}
+
+\begin{frame}{Modelos con respuestas ordinales}{Problemas de ejemplo }
+	\begin{itemize}
+		\item Recuperación de pacientes según calidad de vida (Excelente, Buena, Suficiente, Pobre)
+		\item Dolor (Ninguno, Leve, Considerable, Severo)
+		\item Inclinación política (Extrema izquierda, Izquierda moderada, Moderado, Derecha moderada, Extrema derecha)
+		\item Gasto de una Institución (Muy bajo, Medio, Muy alto)
+		\item Categorización de una variable ordinal. Indice de masa corporal (BMI=peso/altura): $(<18.5, 18.5-25,25-30,>30)$ para (Bajo peso, Peso normal, Sobrepeso )
+	\end{itemize}
+
+\end{frame}
+
+\section{El problema ordinal}
+\begin{frame}
+	\frametitle{El problema ordinal}	
+
+	Sea $c$ el número de categorías de la variable respuesta $Y$. A su vez 
+	las probabilidades de  la respuesta satisfacen $\prod_{i=1}^c\pi_i=1$\\~\ 
+
+	El foco está en modelo como $P(y=j),\ j=1,2,\ldots ,c$, depende de las variables 
+	explicativas $\mathbf{x}$ \\~\  
+
+	Cuando todas las covariables son discretas, el conjunto de datos puede ser 
+	agrupado en forma de conteo en las $c$ categorias de $Y$ para cada 
+	configuración de las variables explicativas
+
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Estrategia de modelamiento}
+
+	Una forma de modelar respuestas binarias es comenzar desde modelos binarios.
+	Es decir, las categorías ordenadas $1\ldots c$ son transformadas a una 
+	respuesta binaria \\~\ 
+
+
+\end{frame}
+
+\subsection{Enfoque acumulativo}
+
+\iffalse
+\begin{frame}
+	\frametitle{Enfoque Acumulativo}
+	Enfoque más sencillo considera una división entre categorias $r$ y $r+1$, 
+	produciendo las  categorias de respuesta agrupadas $\{1,\ldots , r\}$ y $\{r+1,\ldots , c\}$.\\~\
+	
+	El \textbf{Enfoque Acumulativo} usa estos agrupamientos, considerando la variable
+	binaria $y_r=1$ si $Y\leq r$ e $y_r=0$ si $Y>r$. Es decir 	
+
+	$$
+	[1,\dots ,r|r+1,\ldots , c]\ y_r=
+	\begin{cases}
+        1, & Y \in \{1,\ldots , r\}\\
+        0, & Y \in \{r+1,\ldots , c\} 
+    \end{cases}
+	$$
+
+	El modelo de respuesta binaria resultante es
+	$$P(Y\leq r|\mathbf{x})=F(\mathbf{x}^T\beta_r),\ r=1\ldots ,c-1$$
+
+
+\end{frame}
+\fi 
+
+
+\begin{frame}{Modelo Acumulativo Simple}
+	Una forma simple y muy usada es aquella que se deriva del supuesto que
+	las categorías observadas en $Y$ representan una versión discreta de un modelo
+	de regresión continua 
+
+	$$\widetilde{Y}=\pmb{x}^T\pmb{\beta}+\epsilon $$
+
+	Por lo tanto $Y=r \Leftrightarrow \tau_{r-1}<\widetilde{Y}\leq \tau_{r}$. Siendo 
+	$(\tau_{0},\tau_{1},\ldots , \tau_{c})$ puntos de corte en la escala latente. Por lo tanto, 
+	$$P(Y\leq r|\pmb{x})=P(\widetilde{Y}\leq \tau_{r}|\pmb{x})=F(\tau_{r} - \pmb{x}^T\pmb{\beta})$$
+		
+	Luego el modelo queda especificado como $$F^{-1}(P(Y\leq r|\pmb{x}))=\tau_{r} - \pmb{x}^T\pmb{\beta}$$
+\end{frame}
+
+\begin{frame}
+	Por ejemplo, cuando $F$ es la función acumulada de la distribución logística, su inversa $F^{-1}$ 
+	es la función \textit{logit}. Por lo tanto, el \textbf{modelo acumulativo logit} consiste en 
+	$$logit(P(Y\leq r|\pmb{x}))=\log\left(\frac{P(Y\leq r|\pmb{x})}{P(Y> r|\pmb{x})}\right)=\tau_{r} - \pmb{x}^T\pmb{\beta}$$
+
+	Este modelo funciona bien cuando el modelo de regresión se aplica a una respuesta logística.\\~\ 
+
+	Otro modelo similar se genera cuando $F$ es la función de densidad acumulada de una normal standard. 
+	Este modelo se denomina modelo acumulativo probit y funciona bien cuando el modelo de regresión
+	subyacente tiene una $\widetilde{Y}\sim \mathcal{N}(0,1)$
+	
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{}
+
+	Por ejemplo, para una respuesta con 4 niveles cuyo modelo de regresión subyacente con una covariable que
+	además supone una distribución normal standard para $\widetilde{Y}$:
+	\begin{tikzpicture}[remember picture, overlay]
+        \node[above=1.7cm] at (current page.south) 
+        {
+            \includegraphics[width=0.9\textwidth]{ordinal_model_classes_cumulative.png}
+        };
+        %\node[below=-1cm,font=\fontsize{5pt}{5pt}\selectfont] at (current page.south)  {Extracted from \url{https://web.stanford.edu/class/cs224n/}};
+    \end{tikzpicture}
+
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Conclusiones generales}
+	Usualmente, un coeficiente $\beta_j>0$ se interpreta como un efecto positivo de esa covariable 
+	en la probabilidad de que $Y$ tome determinada categoría.\\~\
+	
+	A menudo se hace una interpretación de la variable latente (no observada). Sin embargo, el modelo 
+	resultante puede ser usado sin referencia alguna a la variable latente.\\~\  
+
+	Debido a la derivación del modelo de regresión latente, el efecto de $\pmb{x}$ no depende de la 
+	categoría, es decir es un \textbf{efecto global}.\\~\ 
+
+	El modelo más usado es el logit acumulado o también llamado modelo de probabilidades 
+	proporcionales (\textit{proportional odds})
+
+\end{frame}
+%%%%%%%%%%%%%%%%
+\end{document}

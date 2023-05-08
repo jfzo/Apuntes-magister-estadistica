@@ -1,0 +1,265 @@
+\documentclass[]{beamer}
+
+
+%\usetheme{Darmstadt}
+ 
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{url}
+
+\usepackage{multirow}
+\usefonttheme{default} % default family is serif
+%\usepackage{fontspec}
+%\setmainfont{Liberation Serif}
+
+
+\usepackage{amsmath, amssymb}
+%\usepackage{varwidth}% http://ctan.org/pkg/varwidth
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{tikz}
+
+\usepackage{breqn}
+
+\usetikzlibrary{calc,tikzmark,arrows,shapes,backgrounds}
+%\usetikzlibrary{positioning, fit, arrows.meta, shapes}
+\usetikzlibrary{fit, arrows.meta, shapes}
+
+% used to avoid putting the same thing several times...
+% Command \empt{var1}{var2}
+%\newcommand{\empt}[2]{$#1^{\langle #2 \rangle}$}
+\newcommand{\empt}[2]{$#1^{( #2 )}$}
+
+
+
+\setbeamertemplate{footline}[frame number]
+%%\setbeamertemplate{headline}{Magister en estadística - PUCV}
+ 
+
+\usetikzlibrary{arrows.meta}
+
+
+
+\title{Modelos Lineales para Clasificación}
+\subtitle{Modelos para Multinomial Response}
+\author{Juan Zamora O.}
+%\institute{Pontificia Universidad Católica de Valparaíso}
+\date{}
+
+
+%%% LOGO DE LA PAGINA INICIAL
+\titlegraphic{
+	\begin{tikzpicture}[overlay,remember picture]
+		\node[opacity=0.8,below=0.3cm] at (current page.center){		
+    			\includegraphics[width=4cm]{logo_ies}
+		};
+	\end{tikzpicture}
+}
+%%% END OF LOGO
+
+
+
+
+%%% LOGO DE CADA LAMINA
+\logo{
+	\begin{tikzpicture}[overlay,remember picture]
+		\node[opacity=0.4,right=1.2cm, above=0.12cm] at (current page.south west){		
+    			\includegraphics[width=2cm]{logo_ies}
+		};
+	\end{tikzpicture}
+}
+%%% END OF LOGO
+
+
+
+\begin{document}
+
+\begin{frame}[noframenumbering,plain]
+    \titlepage
+\end{frame}
+
+\section{Intro}
+\begin{frame}
+	\frametitle{Modelos con respuesta categórica}
+	En muchos problemas de regresión, la respuesta está restringida a un
+	conjunto fijo de valores posibles o \textit{categorías de respuesta}\\~\  
+
+	Por ejemplo, la elección de usuarios sobre un conjunto de marcas 
+	o los distintos efectos secundarios de un tratamiento médico\\~\  
+
+	Debemos distinguir entre dos condiciones sobre estas categorías:\\~\  
+
+	\begin{enumerate}
+		\item Categoría de respuesta conformada por etiquetas sin ordenamiento inherente 
+		\item Categorias tienen un ordenamiento. Espaciamiento entre categorías no es interpretable
+	\end{enumerate}
+	
+
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Distribución Multinomial}
+
+	Representa la generalización de la  distribución Binomial\\~\  
+
+	La variable aleatoria multinomial puede tener más de 2 resultados posibles\\~\  
+
+	La variable $Y$ puede tomar cualquier de los valores $1,2,\ldots , k$ con probabilidades 
+	$\pi_1,\pi_2,\ldots ,\pi_k$. Es decir, $P(Y=r)=\pi_r$ 
+
+	
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Distribución Multinomial}
+
+	Consideremos una muestra de $m$ respuestas. Luego, los componentes del vector 
+	$\mathbf{y}^T=(y_1,\ldots , y_{k-1})$ entregan los conteos en cada categoría\\~\  
+
+	Este vector respuesta sigue una distribución multinomial con parámetros $m$ y 
+	$\pi^T=(\pi_1,\pi_2,\ldots ,\pi_k)$	\\~\  
+
+	Este vector tiene función de probabilidad 
+
+	\begin{align*}
+		f(y_1,\ldots ,y_k)=\frac{m!}{y_1!\ldots y_{k-1}!(m-y_1\ldots -y_{k-1})!}\pi_1^{y_1}\ldots \pi_q^{y_{k-1}} &\\ 
+		\cdot(1-\pi_1-\ldots -\pi_{k-1})^{m-y_1\ldots -y_{k-1}} &
+	\end{align*}
+	%$$f(y_1,\ldots ,y_k)=\frac{m!}{y_1!\ldots y_q!(m-y_1\ldots -y_q)!}\pi_1^{y_1}\ldots \pi_q^{y_q}\cdot (1-\pi_1-\ldots -\pi_q)^{m-y_1\ldots -y_q}$$
+
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Multinomial Logit}
+
+	Usado para asociar una variable respuesta con categorias no ordenadas a 
+	otras variables explicativas \\~\  
+	
+	El modelo logit binario tiene la forma 
+	$$log\left(\frac{P(Y=1|\mathbf{x})}{P(Y=2|\mathbf{x})}\right) = \mathbf{x}^T\beta $$
+
+	El modelo logit multinomial tiene la misma forma, pero considera $k-1$ logits
+	$$log\left(\frac{P(Y=r|\mathbf{x})}{P(Y=k|\mathbf{x})}\right) = \mathbf{x}^T\beta_r \ , \ r=1,\ldots ,(k-1)$$
+	
+\end{frame}
+
+\begin{frame}
+	\frametitle{}
+	$k$ es la categoría de referencia y todas las probabilidades son comparadas 
+	con esta última\\~\  
+
+	$$P(Y=k|\mathbf{x})=\frac{1}{1+\prod_{s=1}^{k-1}\exp(\mathbf{x}^T\beta_s)}$$
+
+	y
+
+	$$P(Y=r|\mathbf{x})=\frac{\exp(\mathbf{x}^T\beta_r)}{1+\prod_{s=1}^{k-1}\exp(\mathbf{x}^T\beta_s)} \ , \ r=1,\ldots ,(k-1)$$
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Interpretación de los parámetros}
+
+	Analicemos las preferencias de partidos políticos por género
+
+	\begin{table}[!ht]
+		\centering
+		\begin{tabular}{ll|l|l|l|l|}
+			\cline{3-6}
+
+			& & \multicolumn{4}{ c| }{Partido} \\ \cline{3-6}
+
+			\hline 
+			\multicolumn{1}{ |c| }{Género} & Edad & DC & PS & UDI & RD\\ 
+		\hline
+		\multicolumn{1}{ |c  }{\multirow{4}{*}{H} } & \multicolumn{1}{ |c| }{1}  & 114 & 224 & 53 & 10 \\ %\cline{2-6}
+		\multicolumn{1}{ |c  }{} & \multicolumn{1}{ |c| }{2}  & 134 & 226 & 42 & 9 \\ %\cline{2-6}
+		\multicolumn{1}{ |c  }{} & \multicolumn{1}{ |c| }{3}  & 114 & 174 & 23 & 8 \\ %\cline{2-6}
+		\multicolumn{1}{ |c  }{} & \multicolumn{1}{ |c| }{4}  & 339 & 414 & 13 & 30 \\ \hline
+		\multicolumn{1}{ |c  }{\multirow{4}{*}{M} } & \multicolumn{1}{ |c| }{1} & 42 & 161 & 44 & 5 \\ %\cline{2-6}
+		\multicolumn{1}{ |c  }{} & \multicolumn{1}{ |c| }{2} & 88 & 171 & 60 & 10 \\ %\cline{2-6}
+		\multicolumn{1}{ |c  }{} & \multicolumn{1}{ |c| }{3} & 90 & 168 & 31 & 8 \\ %\cline{2-6}
+		\multicolumn{1}{ |c  }{} & \multicolumn{1}{ |c| }{4} & 413 & 375 & 14 & 23 \\ \hline
+		\end{tabular}
+	\end{table}
+	
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{}
+
+	Estudiemos el efecto del género $\{1:\mbox{M},0:\mbox{H}\}$ sobre la preferencia política
+	a través de un modelo logit
+	$$log\left(\frac{P(Y=r|x)}{P(Y=1|x)}\right)=\beta_{0r} + x_G\beta_r$$
+
+	donde $x_G=1$ cuando responde una mujer y $0$ cuando lo hace un hombre. La categoría 
+	\textit{DC} se asocia con el valor $1$ y es usada como referencia ($\beta_{01}=0$)\\~\  
+
+	Luego, los parámetros se interpretan a partir de 
+	\begin{align*}
+		\beta_{0r} = & \log\left(\frac{P(Y=r|x_G=0)}{P(Y=1|x_G=0)}\right) \\
+		\beta_{r} = & \log\left(\frac{P(Y=r|x_G=1)/P(Y=1|x_G=1)}{P(Y=r|x_G=0)/P(Y=1|x_G=0)}\right)
+	\end{align*}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{}
+
+	\begin{align*}
+		log\left(\frac{P(Y=2|x)}{P(Y=1|x)}\right) & =\beta_{02} + x_G\beta_2 \\ 
+		log\left(\frac{P(Y=3|x)}{P(Y=1|x)}\right) & =\beta_{03} + x_G\beta_3 \\ 
+		log\left(\frac{P(Y=4|x)}{P(Y=1|x)}\right) & =\beta_{04} + x_G\beta_4 
+	\end{align*}
+	
+	Cada vector $\beta_r$ depende de cada valor $r$ de la respuesta, debido a que la comparación
+	$Y=r$ con $Y=k$ es específica para cara $r$.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{}
+
+	$\exp(\beta_{0r})$ representa los Odds de preferir el partido $r$ en lugar del partido 
+	de referencia (DC) por parte de hombres.\\~\  
+
+	$\exp(\beta_{r})$ representa la razón que compara los Odds de las preferencias de mujeres 
+	con las de los hombres
+
+	\begin{table}[]
+		\begin{tabular}{rcccc}
+			& & & & \\ \hline 
+			& $\beta_{0r}$ & $\exp(\beta_{0r})$ & $\beta_{r}$ & $\exp(\beta_{r})$\\ \hline 
+		DC (1)  & 0      & 1     & 0      & 1     \\
+		PS (2)  & 0.392  & 1.480 & -0.068 & 0.934 \\
+		UDI (3) & -1.677 & 0.187 & 0.230  & 1.259 \\
+		RD (4)  & -2.509 & 0.081 & -0.112 & 0.894 \\ \hline 
+		\end{tabular}
+		\caption{Parámetros estimados para la preferencia de partido en base a género}
+	\end{table}
+
+	Para hombres, las Odds de las preferencias de la UDI en lugar de la DC es $0.187$.
+	Odds de mujeres vs hombres es $1.259$
+\end{frame}
+
+\begin{frame}
+	\frametitle{Medición de la calidad del ajuste}
+
+	La idea es medir la discrepancia entre las observaciones y el ajuste\\~\  
+
+	Para esto se compara los vectores de observaciones $p_i=y_i/n$ y el vector ajustado $\pi_i$,
+	 donde ambos vectores tienen dimensión $k-1$.\\~\  
+
+	Deviance 
+	$$D=-2\sum_{r=1}^{k}I(Y_i=r)\log(\widehat{\pi}_{ir})$$
+
+	Pearson 
+	$$\chi_{P}^2=\sum_{i=1}^{n}(p_i-\widehat{\pi}_i)^T\Sigma_i^{-1}(\widehat{\beta})(p_i-\widehat{\pi}_i)$$
+	
+
+\end{frame}
+%%%%%%%%%%%%%%%%
+\end{document}
