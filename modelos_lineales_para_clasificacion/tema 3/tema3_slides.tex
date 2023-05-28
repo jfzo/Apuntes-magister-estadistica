@@ -95,7 +95,7 @@
 	una interpretación deficiente de los resultados.\\~\ 
 
 	Otra manera de abordar este tipo de problemas es mediante el uso de 
-	regresión binaria sobre una varsión colapsada de las categorías. El 
+	regresión binaria sobre una versión colapsada de las categorías. El 
 	problema en este caso es la pérdida de información.
 
 \end{frame}
@@ -118,8 +118,7 @@
 	Sea $c$ el número de categorías de la variable respuesta $Y$. A su vez 
 	las probabilidades de  la respuesta satisfacen $\prod_{i=1}^c\pi_i=1$\\~\ 
 
-	El foco está en modelo como $P(y=j),\ j=1,2,\ldots ,c$, depende de las variables 
-	explicativas $\mathbf{x}$ \\~\  
+	El foco está en modelo $P(y=j),\ j=\{1,2,\ldots ,c\}$, que depende de las variables explicativas $\mathbf{x}$ \\~\  
 
 	Cuando todas las covariables son discretas, el conjunto de datos puede ser 
 	agrupado en forma de conteo en las $c$ categorias de $Y$ para cada 
@@ -127,7 +126,7 @@
 
 \end{frame}
 
-
+\iffalse
 \begin{frame}
 	\frametitle{Estrategia de modelamiento}
 
@@ -137,6 +136,7 @@
 
 
 \end{frame}
+\fi
 
 \subsection{Enfoque acumulativo}
 
@@ -167,8 +167,7 @@
 
 \begin{frame}{Modelo Acumulativo Simple}
 	Una forma simple y muy usada es aquella que se deriva del supuesto que
-	las categorías observadas en $Y$ representan una versión discreta de un modelo
-	de regresión continua 
+	las categorías observadas en $Y$ representan una versión discreta de un modelo	de regresión para una variable continua 
 
 	$$\widetilde{Y}=\pmb{x}^T\pmb{\beta}+\epsilon $$
 
@@ -184,10 +183,10 @@
 	es la función \textit{logit}. Por lo tanto, el \textbf{modelo acumulativo logit} consiste en 
 	$$logit(P(Y\leq r|\pmb{x}))=\log\left(\frac{P(Y\leq r|\pmb{x})}{P(Y> r|\pmb{x})}\right)=\tau_{r} - \pmb{x}^T\pmb{\beta}$$
 
-	Este modelo funciona bien cuando el modelo de regresión se aplica a una respuesta logística.\\~\ 
+	El signo que acompaña a $\pmb{x}^T\pmb{\beta} $ puede ser positivo o negativo. Por ejemplo, el método polr de la librería MASS supone esta parametrización (VGAM usa signo positivo).\\~\ 
 
 	Otro modelo similar se genera cuando $F$ es la función de densidad acumulada de una normal standard. 
-	Este modelo se denomina modelo acumulativo probit y funciona bien cuando el modelo de regresión
+	Este modelo se denomina modelo acumulativo \textit{probit} y funciona bien cuando el modelo de regresión
 	subyacente tiene una $\widetilde{Y}\sim \mathcal{N}(0,1)$
 	
 
@@ -196,8 +195,10 @@
 \begin{frame}
 	\frametitle{}
 
-	Por ejemplo, para una respuesta con 4 niveles cuyo modelo de regresión subyacente con una covariable que
-	además supone una distribución normal standard para $\widetilde{Y}$:
+	Por ejemplo, para una respuesta con 4 niveles.% cuyo modelo de regresión subyacente con una covariable que
+	
+	%además 
+	Supone una distribución normal standard para $\widetilde{Y}$:
 	\begin{tikzpicture}[remember picture, overlay]
         \node[above=1.7cm] at (current page.south) 
         {
@@ -222,7 +223,204 @@
 
 	El modelo más usado es el logit acumulado o también llamado modelo de probabilidades 
 	proporcionales (\textit{proportional odds})
+\end{frame}
 
+\subsection{Ejemplos}
+
+
+\begin{frame}
+	\frametitle{Ejemplo: Discapacidad mental}
+	% 
+	Discapacidad intelectual, medida en una escala de 4 puntos, con eventos de la vida y status socioeconómico. Comprende 40 observaciones de un estudio con personas.
+	
+	Respuesta categorizada en  `Well`, `Mild symptom formation`, `Moderate symptom` y `Impaired`
+	
+	% latex table generated in R 4.2.2 by xtable 1.8-4 package
+% Sat May 27 05:38:03 2023
+\begin{table}[ht]
+\centering
+\begin{tabular}{cccc}
+  \hline
+ Subject & Mental.Impairment & Life.Events & SES \\ 
+  \hline
+1 & Well &   1 & high \\ 
+2 & Well &   9 & high \\ 
+3 & Mild &   4 & high \\ 
+... & ... &  ... &  ... \\
+39 & Moderate &   2 & low \\ 
+40 & Impaired &   0 & high \\ 
+ 
+   \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Modelo}
+	
+	$$logit[\widehat{P}(y_i\leq j)] =\alpha_j + \beta_{1}x_{i1}+ \beta_{2}x_{i2} $$
+	
+	\begin{itemize}
+		\item 	$x_{1}$ corresponde a la variable \textsc{Life.Events} que es una medida compuesta de la cantidad e importancia de eventos ocurridos en la vida de un sujeto.
+	
+	   \item $x_{2}$ \textsc{SES} indica el \textit{status} socieconómico como alto (SES=1) o bajo (SES=0). 
+	
+	\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Parámetros ajustados}
+	
+	
+
+% latex table generated in R 4.2.2 by xtable 1.8-4 package
+% Sun May 28 19:39:43 2023
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & Estimate & Std. Error & z value & Pr($>$$|$z$|$) \\ 
+  \hline
+(Intercept):1 & -0.2819 & 0.6231 & -0.4524 & 0.6510 \\ 
+  (Intercept):2 & 1.2128 & 0.6511 & 1.8626 & 0.0625 \\ 
+  (Intercept):3 & 2.2094 & 0.7171 & 3.0810 & 0.0021 \\ 
+  Life.Events & -0.3189 & 0.1194 & -2.6699 & 0.0076 \\ 
+  SEShigh & 1.1112 & 0.6143 & 1.8090 & 0.0704 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+
+Recordar que para calcular la probabilidad para cada nivel se evalua primero la expresión
+$$\widehat{P}(y_i\leq j) =\frac{\exp^{\alpha_j + \beta_{1}x_{i1}+ \beta_{2}x_{i2}}}{1+ \exp^{\alpha_j + \beta_{1}x_{i1}+ \beta_{2}x_{i2}}}= \frac{\exp^{\alpha_j -0.3189x_{i1}+ 1.1112x_{i2}}}{1+ \exp^{\alpha_j -0.3189x_{i1}+ 1.1112x_{i2}}} $$
+
+y luego se calcula $$\widehat{P}((j-1)\leq y_i\leq j)= \widehat{P}(y_i\leq j)  - \widehat{P}(y_i\leq (j-1))$$
+
+\end{frame}
+
+
+\begin{frame}
+\begin{itemize}
+	\item Considerando un valor fijo para \textsc{Life.Events}, en el nivel alto de \textsc{SES} las \textit{odds} estimadas de discapacidad mental para cualquier nivel dado, son $\exp^{1.1112}=3.038$ veces las \textit{odds}  estimadas para el nivel bajo de \textsc{SES}.
+	
+	\item Tomando el error std. podemos también identificar que el I.C. al $95\%$ para este efecto es $$exp^{1.1112\pm 1.96(0.6143)}= [0.9114,10.1272] $$
+
+\end{itemize}	
+\end{frame}
+
+\begin{frame}
+La probabilidad acumulada, comenzando en el nivel "Well", disminuye a medida que \textsf{Life.Events} aumenta, y es más alto para el nivel más alto de \textsf{SES}.
+\vspace{30pt}
+
+	\begin{tikzpicture}[remember picture, overlay]
+        \node[above=0.6cm] at (current page.south) 
+        {
+            \includegraphics[width=0.45\textwidth]{mentalimpairment_well_cat_ses2.png}
+        };
+    \end{tikzpicture}
+\end{frame}
+
+
+
+\begin{frame}
+	\frametitle{Salida para el modelo anterior con `polr`}
+
+En este caso se usa parametrización $\alpha_j -\pmb{x}^T\pmb{\beta} $. Sin embargo, los coeficientes son los mismos.
+
+
+% latex table generated in R 4.2.2 by xtable 1.8-4 package
+% Sun May 28 20:28:45 2023
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & Value & Std. Error & t value \\ 
+  \hline
+Life.Events & 0.3189 & 0.1210 & 2.6354 \\ 
+  SEShigh & -1.1112 & 0.6109 & -1.8191 \\ 
+  Well$|$Mild & -0.2819 & 0.6423 & -0.4389 \\ 
+  Mild$|$Moderate & 1.2128 & 0.6607 & 1.8357 \\ 
+  Moderate$|$Impaired & 2.2094 & 0.7210 & 3.0644 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+\end{frame}
+
+
+%%%%
+%%%% Otro ejemplo
+\begin{frame}
+	\frametitle{Ejemplo: Estudio de lesión de rodilla}
+	% p241 - tutz
+	Reporte de dolor post-tratamiento en una escala de 5 puntos.
+	
+\begin{table}[]
+\begin{tabular}{lccccc}
+                     & \textbf{Sin dolor} &    &  $\longrightarrow $  &    & \textbf{Dolor severo} \\
+                     & 1                  & 2  & 3  & 4  & 5                     \\ \hline
+\textbf{Placebo}     & 17                 & 8  & 14 & 20 & 4                     \\
+\textbf{Tratamiento} & 19                 & 26 & 11 & 6  & 2                     \\ \hline
+\end{tabular}
+\end{table}
+	
+\textbf{Objetivo}: Cuantificar asociación entre efecto del tratamiento y nivel de dolor
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Modelo y parámetros ajustados}
+
+El modelo corresponde a:	
+$$logit[\widehat{P}(y_i\leq j)] =\alpha_j + \beta_{1}x_{i1}$$
+
+donde $x_1$ corresponde a la pertenencia al grupo de placebo (\textsc{Th}=P) o tratamiento (\textsc{Th}=T).
+
+	% latex table generated in R 4.2.2 by xtable 1.8-4 package
+% Sun May 28 22:10:25 2023
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & Estimate & Std. Error & z value & Pr($>$$|$z$|$) \\ 
+  \hline
+(Intercept):1 & -1.4659 & 0.2742 & -5.3470 & 0.0000 \\ 
+  (Intercept):2 & -0.2860 & 0.2413 & -1.1853 & 0.2359 \\ 
+  (Intercept):3 & 0.6668 & 0.2488 & 2.6804 & 0.0074 \\ 
+  (Intercept):4 & 2.6436 & 0.4365 & 6.0568 & 0.0000 \\ 
+  ThT & 0.8932 & 0.3250 & 2.7483 & 0.0060 \\ 
+   \hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+
+\begin{frame}
+	\begin{itemize}
+		\item El efecto del tratamiento producido por el modelo es de $0.8932$ con un error std. de $0.325$. 
+		\item Esto muestra un efecto en la respuesta producto de la realización del tratamiento.
+		\item Además, para cualquier categoría de la respuesta, la razón de \textit{odds} acumulados entre tratamiento y placebo cumple con $$\frac{P(y_i\leq j|T)/P(y_i> j|T)}{P(y_i\leq j|P)/P(y_i> j|P)}=\exp^{0.8932}=2.443$$
+	\end{itemize}
+
+Por lo tanto, las \textit{odds} para cualquier categoría de menor dolor, en comparación con categorías más altas de la respuesta ($+$ dolor) son más altas en el grupo de \textbf{T}ratamiento.
+\end{frame}
+
+\begin{frame}
+	\textbf{Calculando algunas probabilidades}
+	Tomando los coeficientes resultantes para cada nivel (interceptos) junto con el coeficiente asociado a la covariable grupo, podemos calcular las siguientes probabilidades:
+	
+	\begin{table}[]
+\begin{tabular}{lccccc}
+                & \textbf{Sin dolor} &    &    &    & \textbf{Dolor severo} \\
+                     & 1                  & 2  & 3  & 4  & 5                     \\ \hline
+\textbf{Placebo}     & 0.1876                 & 0.2414  & 0.2318 & 0.2728 & 0.0664                     \\
+\textbf{Tratamiento} & 0.3606                 & 0.2867 & 0.1791 & 0.1454  & 0.0283                     \\ \hline
+\end{tabular}
+\end{table}
+	
+	Notar como va aumentando la probabilidad de reportar un dolor más intenso para el grupo P, en contraste con la disminución de esta misma para el grupo T.
 \end{frame}
 %%%%%%%%%%%%%%%%
 \end{document}
