@@ -87,21 +87,24 @@
 	% In regularization, what we do is normally we keep the same number of features but reduce the magnitude of the coefficients. We can reduce the magnitude of the coefficients by using different types of regression techniques which uses regularization to overcome this problem. So, let us discuss them. Before we move further, you can also upskill with the help of online courses on Linear Regression in Python and enhance your skills.
 
 	Anteriormente, discutimos modelos lineales para clasificación que usaban un número moderado de variables explicativas basados en 
-	Máxima Verosimilitud (MV)\\~\
+	Máxima Verosimilitud (\textbf{MV})\\~\
 	
-	En algunos problemas, este número puede ser realmente elevado, por ejemplo en genómica pueden llegar los varios miles.\\~\
+	En algunos problemas, este número puede ser realmente elevado, por ejemplo en genómica pueden llegar a los varios miles.\\~\
 	
 	MV no funciona correctamente en estos contextos.\\~\ 
 	
-	En problemas con alta dimensionalidad,  la reducción de la cantidad de predictores es un asunto relevante.
+	En otros problemas con alta dimensionalidad (texto por ejemplo), la reducción de la cantidad de predictores es un asunto relevante.
 \end{frame}
 
 \begin{frame}
-	Existen diversos métodos para la selección de subconjuntos de predictores. Por ejemplo, \textit{Stepwise variable selection}.\\~\ 
+	Existen diversos métodos para la selección de subconjuntos de predictores. Ej. uno clásico, \textit{Stepwise variable selection}.\\~\ 
 	
 	Este tipo de métodos puede variar notoriamente su resultado en presencia incluso de pequeños cambios en los datos\\~\ 
 	
-	Este tipo de métodos exhibe una alta varianza en el error de predicción.\\~\
+%	Además, exhibe una alta varianza en el error de predicción.\\~\
+
+Proceso de selección es discreto, deja o quita predictor, y por lo tanto resultado es muy variable.\\~\
+
 	
 	Los métodos de regularización permiten encoger los estimadores hacia el cero e incluso realizar selección de variables vía optimización 
 	de log-verosimilitud penalizada
@@ -125,7 +128,7 @@
 	$$l_{\mathsf{P}}(\pmb{\beta})=\displaystyle\sum_{i=1}^{N}l_i(\pmb{\beta})-\frac{\lambda}{2}J(\pmb{\beta})$$
 
 	Donde $l_i(\pmb{\beta})$ representa la contribución del i-ésimo ejemplo a la log-verosimilitud, $\lambda$ 
-	es un parámetro que indica qué tanto regularizar y $J$ es un funcional que penaliza el tamaño de los parámetros\\~\ 
+	es un parámetro ajustable que indica qué tanto regularizar y $J$ es un funcional que penaliza la magnitud de los parámetros\\~\ 
 	
 	Asintóticamente, métodos de regularización que \textit{encogen} los estimadores reducen la varianza\footnote{\tiny{``On ordinary ridge regression in generalized linear models'', Segerstedt, 1992.}}.
 	
@@ -135,7 +138,7 @@
 	Al maximizar $l_{\mathsf{P}}$ se buscan estimadores para los coeficientes cercanos a la solución por MV, 
 	pero con parámetros regularizados. \\~\  
 
-	Por ejemplo, la penalización Lasso utiliza $J(\pmb{\beta})=\sum_{j=1}^m |\beta_j|$. Este esquema 
+	Por ejemplo, la penalización \textbf{Lasso} utiliza $J(\pmb{\beta})=\sum_{j=1}^m |\beta_j|$. Este esquema 
 	favorece la generación de modelos \textit{sparse} con menor cantidad de coeficientes no nulos.\\~\
 	
 	Este tipo de métodos es especialmente útil cuando existen predictores correlacionados.\\~\
@@ -155,6 +158,7 @@
 
 \begin{frame}
 
+\frametitle{Ejemplo}
 	El conjunto de datos de diabetes en los indios Pima tiene como tarea la 
 	predicción de la aparición de diabetes en un periodo de 5 años usando 
 	detalles médicos como covariables.
