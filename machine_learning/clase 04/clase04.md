@@ -1,6 +1,6 @@
 ---
 title: 
-- EST-733 2022-II
+- EST-733
 subtitle:
 - Machine Learning
 author:
@@ -60,7 +60,7 @@ El aprendizaje consiste en poder generalizar sobre objetos no vistos anteriormen
 
 En esta sesión, nos concentraremos en métodos que escogen $y$ tal que $(x,y)$ es *similar* a los ejemplos de entrenamiento.
 
-- Necesitamos contar con una noción de similitud en $\mathcal{X}$.$.
+- Necesitamos contar con una noción de similitud en $\mathcal{X}$.
 - Denominemos a esta medida de similitud como $\mathbf{k}$,
 
 $$
