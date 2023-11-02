@@ -13,7 +13,7 @@
 |      5     	| Modelo probabilístico para la extracción de tópicos en textos 	|
 
 
-- These slides use Pandoc
+- These slides use Pandoc 3.1.1+
 - Compile using the following command
   
 ```
