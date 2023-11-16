@@ -25,7 +25,17 @@ DOCKER_UID           = $(shell id -u)
 DOCKER_GID           = $(shell id -g)
 DOCKER_USER          = $(DOCKER_UID):$(DOCKER_GID)
 CURRENT_DIR := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
+
+
+# make ARCH_WITH_MD_EXTENSION.pdf USE_DOCKER=no
+USE_DOCKER=yes
+
+#ifdef USE_DOCKER
+ifeq ($(USE_DOCKER),yes)
 PANDOC=docker run --rm --volume "$(CURRENT_DIR):/data" --user $(DOCKER_USER) pandoc-texlive-full-jz
+else
+PANDOC=pandoc
+endif
 
 PANDOC_OPTIONS=--standalone -f markdown+pipe_tables+backtick_code_blocks+auto_identifiers+strikeout+yaml_metadata_block+implicit_figures+all_symbols_escapable+link_attributes+smart+fenced_divs
 PANDOC_HTML_OPTIONS=--to html5
