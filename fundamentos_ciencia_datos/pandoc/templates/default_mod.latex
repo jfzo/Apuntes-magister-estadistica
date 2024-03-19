@@ -423,7 +423,7 @@ $endfor$
 $endif$
 
 $if(title)$
-\title{$title$$if(thanks)$\thanks{$thanks$}$endif$}
+\title{$title$ $if(topic)$ \\\vspace{8pt} \large $topic$ $endif$ $if(thanks)$\thanks{$thanks$}$endif$}
 $endif$
 $if(subtitle)$
 $if(beamer)$
@@ -431,7 +431,8 @@ $else$
 \usepackage{etoolbox}
 \makeatletter
 \providecommand{\subtitle}[1]{% add subtitle to \maketitle
-  \apptocmd{\@title}{\par {\large #1 \par}}{}{}
+  \apptocmd{\@title}{\par {\large #1 } \par}}{}{}
+  %\apptocmd{\@title}{\par {\large #1 : $if(topic)$ $topic$ $endif$} \par}}{}{}
 }
 \makeatother
 $endif$
