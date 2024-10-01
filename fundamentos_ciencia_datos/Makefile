@@ -28,7 +28,7 @@ CURRENT_DIR := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
 
 # make ARCH_WITH_MD_EXTENSION.pdf USE_DOCKER=no
-USE_DOCKER=yes
+USE_DOCKER=no
 
 #ifdef USE_DOCKER
 ifeq ($(USE_DOCKER),yes)

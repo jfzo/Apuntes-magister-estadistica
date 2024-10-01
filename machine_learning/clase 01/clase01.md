@@ -1,39 +1,24 @@
 ---
-title: 
-- EST-733
-subtitle:
-- Machine Learning
-author:
-- Juan Zamora O.
-#theme:
-#- Copenhagen
-date:
-- Agosto 2023
-header-includes: |
-	\usepackage{tikz}
-    \usetikzlibrary{calc,tikzmark,arrows,shapes,backgrounds}
-    \usetikzlibrary{fit, arrows.meta, shapes}        
-    \usepackage[T1]{fontenc}
-    \usepackage[utf8]{inputenc}
-    \usepackage{url}
-    \newcommand{\empt}[2]{#1^{( #2 )}}
-    \thispagestyle{empty}
-
-    \titlegraphic { 
-    \begin{tikzpicture}[overlay,remember picture]
-    \node[below=-2.6cm] at (current page.south){
-        \includegraphics[width=6cm]{logosAzul.png}
-    };
-    \end{tikzpicture}
-    }
-    \logo{
-	\begin{tikzpicture}[overlay,remember picture]
-		\node[opacity=0.4,right=-0.6cm, above=0.07cm] at (current page.south east){
-    			\includegraphics[height=1cm]{logoAzul.png}
-        };
-	\end{tikzpicture}
-    }
+title: Introducción
+topic: EST852 -- Machine Learning
+author: Juan Zamora O.
+date: Octubre, 2024.
+fonttheme: "professionalfonts"
+fontsize: 11pt
+theme: default
+innertheme: circles
+urlcolor: blue
+linkstyle: bold
+aspectratio: 169
+titlegraphic: logosAzul.png
+logo: logoAzul.png
+section-titles: false
+toc: true
+toc-title: Estructura de la Presentación
+section-titles: false
 ---
+
+
 # Introducción
 
 <!--
@@ -131,11 +116,6 @@ En general se divide en tres grandes categorias:
   \end{tikzpicture}
 
 
-## Videos de ejemplo
-
-[![w:30](pole_capture.png)](https://youtu.be/5Q14EjnOJZc?t=9 "Cart Pole System") 
-[![w:30](obj_detection.png)](https://youtu.be/O3b8lVF93jU?t=427 "Automatic Object Detection") 
-[![w:30](image_segmentation.png)](https://youtu.be/W-oVad7x-HQ?t=1078 "Image segmentation")
 
 
 ## Contexto del Curso
