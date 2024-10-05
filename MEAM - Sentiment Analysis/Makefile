@@ -11,7 +11,7 @@
 SOURCE_DOCS := $(wildcard *.md)
 
 
-EXPORTED_DOCS=$(SOURCE_DOCS:.md=.pdf)
+EXPORTED_DOCS=$(SOURCE_DOCS:.md)
 
 #EXPORTED_DOCS=\
 # $(SOURCE_DOCS:.md=.html) \
@@ -44,7 +44,7 @@ ifeq ($(OS), Linux)
 # Run Linux commands 
 	EXT := ""
 endif
-EXT := ""
+EXT := 
 
 
 
@@ -93,8 +93,7 @@ PANDOC_EPUB_OPTIONS=--to epub3
 
 .PHONY: all clean
 
-all : $(EXPORTED_DOCS)
-
+all : $(SOURCE_DOCS:.md=.pdf)
 
 
 clean:

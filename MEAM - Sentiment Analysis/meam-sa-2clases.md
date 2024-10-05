@@ -16,6 +16,8 @@ section-titles: false
 toc: true
 toc-title: Estructura
 bibliography: referencias.bib
+natbib: true
+natbiboptions: square,numbers
 section-titles: false
 ---
 
