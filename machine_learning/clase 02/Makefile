@@ -72,7 +72,7 @@ PANDOC_EPUB_OPTIONS=--to epub3
 
 .PHONY: all clean
 
-all : $(EXPORTED_DOCS)
+all : $(SOURCE_DOCS:.md=.pdf)
 
 clean:
 	- $(RM) $(EXPORTED_DOCS)

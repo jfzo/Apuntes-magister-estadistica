@@ -30,7 +30,7 @@ section-titles: false
   - Aprendizaje de redes bayesianas (belief networks)
 - Proveen de un marco conceptual muy útil
 
-## Teorema de Bayes
+# Teorema de Bayes
 
 $$P(h|D)=\frac{P(D|h)P(h)}{P(D)}$$
 
@@ -49,6 +49,8 @@ $$P(h|D)=\frac{P(D|h)P(h)}{P(D)}$$
 
 - Hipotesis máxima a posteriori ($h_{MAP}$):  
 $$h_{MAP}=\underset{h\in H}{\operatorname{argmax}} P(h|D)$$
+
+---
 
 ### Hipotesis máxima a posteriori
 
@@ -180,10 +182,12 @@ mientras que la $h_{MAP}$ indicaría que la instancia es etiquetada como $\oplus
 ## Clasificador Bayesiano Ingenuo
 
 Cuando usar:
+
 - Tamaños de datasets medianos o grandes
 - Atributos que describen a cada instancia son condicionalmente independientes dada la etiqueta o clasificación
 
 Aplicaciones exitosas:
+
 - Diagnostico de enfermedades
 - Clasificación de textos (SPAM)
 
