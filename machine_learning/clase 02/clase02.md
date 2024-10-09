@@ -61,11 +61,13 @@ $$= \underset{h\in H}{\operatorname{argmax}} P(D|h)P(h)$$
 - *Nota*: Si se asume que $P(h_i)=P(h_j), \forall h_i, h_j\in H$, entonces 
 $$h_{ML}=\underset{h_i\in H}{\operatorname{argmax}} P(D|h_i)$$
 
+
 ## Ejemplo
 
-Un paciente se toma un test viral y el resultado es positivo. El **test** entrega positivo de manera correcta en solo el $98\%$ de los casos en la enfermedad está realmente presente, y un negativo correcto en solo el $97\%$ de los casos en que la enfermedad no está presente.
-Adicionalmente, $0.008$ de toda la población tiene esta enfermedad. 
+\only<1,2>{Un paciente se somete un examen de cáncer y el resultado es positivo. Este test entrega positivo de manera correcta en solo el $98\%$ de los casos en la enfermedad está realmente presente, y un negativo correcto en solo el $97\%$ de los casos en que la enfermedad \textbf{no} está presente.
+Adicionalmente, el $0.8\%$ de toda la población tiene esta enfermedad. }
 
+\only<1>{
 $$
 \begin{array}{cc} 
 P(\mbox{cancer})= & P(\neg\mbox{cancer})=\\
@@ -73,13 +75,10 @@ P(\oplus|\mbox{cancer})= & P(\ominus|\mbox{cancer})=\\
 P(\oplus|\neg\mbox{cancer})= & P(\ominus|\neg\mbox{cancer})=
 \end{array}
 $$ 
+}
 
----
 
-Un paciente se toma un test viral y el resultado es positivo. El **test** entrega positivo de manera correcta en solo el $98\%$ de los casos en la enfermedad está realmente presente, y un negativo correcto en solo el $97\%$ de los casos en que la enfermedad no está presente.
-
-Adicionalmente, $0.008$ de toda la población tiene esta enfermedad. 
-
+\only<2>{
 $$
 \begin{array}{cc} 
 P(\mbox{cancer})= .008& P(\neg\mbox{cancer})= .992\\
@@ -87,8 +86,10 @@ P(\oplus|\mbox{cancer})=.98 & P(\ominus|\mbox{cancer})=.02\\
 P(\oplus|\neg\mbox{cancer})= .03& P(\ominus|\neg\mbox{cancer})= .97
 \end{array}
 $$ 
+}
 
 ---
+
 
 Suponga que se observa un nuevo paciente para quien el test indicó un resultado positivo. ¿Deberíamos diagnosticar al paciente como con cancer o no?
 
