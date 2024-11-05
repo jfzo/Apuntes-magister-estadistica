@@ -91,12 +91,6 @@ $$
     \node[below=-1cm,font=\fontsize{5pt}{5pt}\selectfont] at (current page.south)  {Fuente fuente \textit{Hastie et al., 2017}};
 \end{tikzpicture}
 
-<!-- 
----
-
-- La estimación de $Err$ tiene mayor sintonía con un análisis estadístico, no es posible estimar el error condicional, dada solamente la información de el mismo conjunto de entrenamiento
-- Nuestro objetivo será realizar una estimación de $Err_{\mathcal{T}}$-->
-
 
 ## Error de entrenamiento
 
@@ -138,9 +132,10 @@ Perseguiremos dos tareas/objetivos
     |---|---|---|
     | **Entrenamiento** | **Validación** | **Prueba** |
     |---|---|---|
-    | Para ajustar los modelos | Estimar error de pred. en la selección de modelos | Evaluación del error de generalización para el modelo escogido
+    | Para ajustar los modelos | Estimar error de pred. en la selección de modelos | Evaluación del error de generalización para el modelo escogido | 
 
 - Muchos/Pocos datos depende de la complejidad del modelo, razón señal a ruido de función generadora de los datos ...
+
 
 ---
 
@@ -152,7 +147,6 @@ Perseguiremos dos tareas/objetivos
 - Remuestreo: CV o Bootstrap
   - Útilidad para cualquier estimador del error de predicción
 
-<!-- Si alcanzo, completar con la descomposición sesgo varianza de la p.223-->
 
 ## Validación Cruzada
 
@@ -168,29 +162,28 @@ Perseguiremos dos tareas/objetivos
 \vspace{10pt}
 
 \begin{table}[]
-\begin{tabular}{baaaa}
+\begin{tabular}{ccccc}
 \hline
-  Valid & Train & Train & Train & Train  \\ 
+  \col Valid & Train & Train & Train & Train  \\ 
 \end{tabular}
 
-\begin{tabular}{abaaa}
-  Train & Valid & Train & Train & Train  \\ 
+\begin{tabular}{ccccc}
+  Train & \col Valid & Train & Train & Train  \\ 
 \end{tabular}
 
-\begin{tabular}{aabaa}
-  Train & Train & Valid & Train & Train \\ 
+\begin{tabular}{ccccc}
+  Train & Train & \col Valid & Train & Train \\ 
 \end{tabular}
 
-\begin{tabular}{aaaba}
-  Train & Train & Train & Valid & Train \\ 
+\begin{tabular}{ccccc}
+  Train & Train & Train & \col Valid & Train \\ 
 \end{tabular}
 
-\begin{tabular}{aaaab}
-  Train & Train & Train & Train & Valid  \\ \hline
+\begin{tabular}{ccccc}
+  Train & Train & Train & Train & \col Valid  \\ \hline
 \end{tabular}
 \end{table}
 \vspace{10pt}
-
 - Se ajusta el modelo con $K-1$ partes y se calcula el error de predicción sobre la restante
 
 ---
@@ -237,3 +230,4 @@ Finalmente, el valor $\hat{\alpha}$ que la minimiza nos permitirá seleccionar n
 7. Realice $k$-fold CV usando únicamente los predictores seleccionados
 8. Reporte $CV(\hat{f}_{\alpha})$
 9. Repita 5-8 para 3 valores distintos de $P$
+

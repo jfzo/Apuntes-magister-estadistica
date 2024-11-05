@@ -7,8 +7,13 @@
 \setmainfont[Path = ./pandoc/fonts/Hack/,BoldFont=HackNerdFont-Bold.ttf,ItalicFont=HackNerdFont-Italic.ttf]{HackNerdFont-Regular.ttf}    
 \setsansfont[Path = ./pandoc/fonts/Hack/,BoldFont=HackNerdFont-Bold.ttf,ItalicFont=HackNerdFont-Italic.ttf]{HackNerdFont-Regular.ttf}    
 \usepackage{url}
-
+\usepackage{tabularx, booktabs}
 \usepackage{easybmat}
 \usepackage{tikz}
 \usetikzlibrary{matrix,calc,tikzmark,arrows,shapes,backgrounds}
 \usetikzlibrary{fit, arrows.meta, shapes}        
+\usepackage{xcolor,colortbl, transparent}
+\definecolor{col}{rgb}{0.5,0.3,0.1}
+\newcommand{\col}{\transparent{0.8}\cellcolor{col}} 
+
+\newcommand{\theHtable}{\thetable}
