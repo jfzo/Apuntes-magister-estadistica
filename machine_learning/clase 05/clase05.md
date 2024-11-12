@@ -15,12 +15,14 @@ logo: logoAzul.png
 section-titles: false
 toc: true
 toc-title: Estructura de la Presentación
+toc-depth: 3
 section-titles: false
 ---
 
 # Introducción
 
 <!--
+    pandoc -t beamer %:r.md --from markdown-footnotes+pipe_tables+grid_tables --katex --slide-level=2 -o %:r.pdf
   pandoc -t beamer ./clase05.md -o clase05.pdf --katex --slide-level=2
  -->
 
