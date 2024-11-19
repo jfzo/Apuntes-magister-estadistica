@@ -200,7 +200,145 @@ $$
 \end{tikzpicture}
 
 
-## Referencias
+# Métodos de ensamblado para clasificación con datos desbalanceados
+
+- Importante paradigma en ML
+- Utiliza una colección de clasificadores para realizar predicciones
+- Capacidad de generalización generalmente es superior a la de los componentes
+- Usados en presencia de desequilibrio de clases para mejorar métodos
+  existentes o crear nuevos
+
+## Métodos de ensamblado
+
+- Se entrena un conjunto de aprendices basales (base learners)
+- Predicción del ensamblado corresponde a la combinación de las predicciones
+  indiviuales
+- Puede mejorar learners bastante frágiles (cercanos al azar) produciendo
+  learners con mayor capacidad de generalización
+    - Ej. Árboles de decisión muy superficiales, RNA con una capa ocula y pocas
+      neuronas .
+
+---
+
+### Categorización
+
+De acuerdo a como se generan los learners, estos métodos se agrupan en
+2 paradigmas:
+
+1. Métodos de generación paralela
+    - Ejemplo, Bagging
+2. Métodos de generación secuencia: Learners anteriores influencian la
+   generación de los subsiguientes.
+    - Ejemplo, ADABoost
+
+- Combinación mediante promedio, votación, stacking.
+
+## Bagging
+
+- Idea base: Error puede ser reducido al combinar learners independientes.
+\begin{tikzpicture}[remember picture, overlay]
+    
+    \node[above=0.7cm] at (current page.south) 
+    {
+        \includegraphics[width=0.5\textwidth]{baggingschema.png}
+    };
+    \node[below=-0.9cm,font=\fontsize{5pt}{5pt}\selectfont] at (current page.south)  
+    {
+      Fuente. wikipedia.
+    };
+\end{tikzpicture}
+
+---
+
+\begin{tikzpicture}[remember picture, overlay]
+    
+    \node[above=-2.0cm] at (current page.center) 
+    {
+        \includegraphics[width=0.8\textwidth]{BaggingAlgorithm.png}
+    };
+\end{tikzpicture}
+
+
+## Boosting
+
+- Idea base: Corrección progresiva de errores en learners anteriores.
+
+\begin{tikzpicture}[remember picture, overlay]
+    
+    \node[above=0.7cm] at (current page.south) 
+    {
+        \includegraphics[width=0.5\textwidth]{boostingschema.png}
+    };
+    \node[below=-0.9cm,font=\fontsize{5pt}{5pt}\selectfont] at (current page.south)  
+    {
+      Fuente. wikipedia.
+    };
+\end{tikzpicture}
+
+---
+
+
+\begin{tikzpicture}[remember picture, overlay]
+    
+    \node[above=-4.0cm] at (current page.center) 
+    {
+        \includegraphics[width=0.7\textwidth]{adaboostalgorithm.png}
+    };
+\end{tikzpicture}
+
+
+## Ensamblado para Datos desbalanceados
+
+- Undersampling: Desperdicio al ignorar información relevante de la clase
+  mayoritaria
+- Oversampling: Se puede introducir ruido o traslape entre clases.
+    - ¿Que pasaría si en cada ronda de AdaBoost, la distribución de pesos se
+      ajusta mediante SMOTE para aumentar el foco en la clase mayoritaria?
+
+---
+
+### Ejemplo: Métodos basados en Boosting
+
+- Con Boosting es posible aumentar el número  de ejemplos de clase minoritaria
+  o disminuir el número de la clase mayoritaria
+- Permite aumentar el foco en los ejemplos de la clase minoritaria
+- Ejemplos: SMOTEBoost y RUSBoost.
+
+---
+
+#### SMOTEBoost
+
+- Usa ADABoost como base.
+- En cada ronda de boosintg, se usa SMOTE para generar ejemplos sintéticos para
+  la clase minoritaria.
+- La distribución de pesos es reajustada
+    - Pesos de la clase minoritaria aumentan
+
+---
+
+\begin{tikzpicture}[remember picture, overlay]
+    
+    \node[above=-4.0cm] at (current page.center) 
+    {
+        \includegraphics[width=0.7\textwidth]{Smoteboost algorithm.png}
+    };
+\end{tikzpicture}
+
+---
+
+**SMOTE**
+
+
+\begin{tikzpicture}[remember picture, overlay]
+    
+    \node[above=-4.0cm] at (current page.center) 
+    {
+        \includegraphics[width=0.4\textwidth]{SMOTEalgorithm.png}
+    };
+\end{tikzpicture}
+
+
+# Referencias
 
 <style scoped>
 {
