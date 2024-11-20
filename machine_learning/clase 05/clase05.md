@@ -215,7 +215,7 @@ $$
   indiviuales
 - Puede mejorar learners bastante frágiles (cercanos al azar) produciendo
   learners con mayor capacidad de generalización
-    - Ej. Árboles de decisión muy superficiales, RNA con una capa ocula y pocas
+    - Ej. Árboles de decisión muy superficiales, RNA con una capa oculta y pocas
       neuronas .
 
 ---
@@ -261,7 +261,7 @@ De acuerdo a como se generan los learners, estos métodos se agrupan en
 
 ## Boosting
 
-- Idea base: Corrección progresiva de errores en learners anteriores.
+- Idea base: Corrección progresiva de errores cometidos por learners anteriores.
 
 \begin{tikzpicture}[remember picture, overlay]
     
@@ -293,7 +293,7 @@ De acuerdo a como se generan los learners, estos métodos se agrupan en
   mayoritaria
 - Oversampling: Se puede introducir ruido o traslape entre clases.
     - ¿Que pasaría si en cada ronda de AdaBoost, la distribución de pesos se
-      ajusta mediante SMOTE para aumentar el foco en la clase mayoritaria?
+      ajusta mediante SMOTE para aumentar el foco en la clase minoritaria?
 
 ---
 
