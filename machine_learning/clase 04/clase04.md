@@ -15,7 +15,6 @@ logo: logoAzul.png
 section-titles: false
 toc: true
 toc-title: Estructura de la Presentación
-section-titles: false
 ---
 
 
@@ -32,7 +31,93 @@ $$
 
 El aprendizaje consiste en poder generalizar sobre objetos no vistos anteriormente. Para un nuevo objeto $x\in \mathcal{X}$, predecir su correspondiente $y\in \{\pm 1\}$.
 
+
 ---
+
+### Un algoritmo simple de clasificación
+
+
+Suponga que $\mathcal{X}\subset \mathbb{R}^n$ y las dos clases son separables linealmente.
+
+$$
+\begin{array}{ccc}
+  \mathbf{c}_+=\frac{1}{m_+}\sum_{\{i|y_i=+1\}}\mathbf{x_i}& & \mathbf{c}_-=\frac{1}{m_-}\sum_{\{i|y_i=-1\}}\mathbf{x_i}\\
+  \mathbf{c}=\frac{1}{2}(\mathbf{c}_+ + \mathbf{c}_-)&&
+\end{array}
+$$
+
+- Suponemos además que ambas clases tienen observaciones ($\mathbf{c}_+,\mathbf{c}_->0$)
+
+
+\begin{tikzpicture}[remember picture, overlay]
+    
+  \node[above=0.8cm] at (current page.south) 
+  {
+      \includegraphics[width=0.4\textwidth]{parzen_algo.png}
+  };
+  \node[below=-1cm,font=\fontsize{5pt}{5pt}\selectfont] at (current page.south)  {Fuente fuente XXX};
+\end{tikzpicture}
+
+---
+
+Asignaremos el nuevo punto $\mathbf{x}$ a la clase cuya media esté  más cerca.
+
+Formularemos esta tarea en términos del producto interno $\langle .,.\rangle$
+
+Para obtener la clase, revisaremos si el **ángulo** entre el vector que conecta punto central $\mathbf{c}$ con $\mathbf{x}$ y aquel que conecta los centros de ambas clases es menor que $\pi/2$.
+
+\begin{tikzpicture}[remember picture, overlay]
+    
+  \node[above=0.9cm] at (current page.south) 
+  {
+      \includegraphics[width=0.21\textwidth]{ampliacion_angulo.png}
+  };
+\end{tikzpicture}
+
+---
+
+En terminos formales, lo anterior equivale a 
+
+$$
+\begin{array}{cc}
+  y=&sgn(\langle (\mathbf{x}-\mathbf{c}), (\mathbf{c}_+-\mathbf{c}_-)\rangle) \\
+  =& sgn(\langle (\mathbf{x}-\frac{1}{2}(\mathbf{c}_+ + \mathbf{c}_-)), (\mathbf{c}_+-\mathbf{c}_-)\rangle) \\
+  =& sgn(\langle\mathbf{x}, \mathbf{c}_+\rangle-\langle\mathbf{x}, \mathbf{c}_-\rangle- \frac{1}{2}\left (\Vert\mathbf{c}_+\Vert^2- \Vert\mathbf{c}_-\Vert^2 \right )) \\
+=& sgn(\langle\mathbf{x}, \mathbf{c}_+\rangle-\langle\mathbf{x}, \mathbf{c}_-\rangle + b)  
+\end{array}
+$$
+
+Podemos reescribir la función de decisión anterior, sustituyendo $\mathbf{c}_+$ y $\mathbf{c}_-$
+
+$$
+\begin{array}{cc}
+  y=&sgn\left ( \frac{1}{m_+}\sum_{\{i|y_i=+1\}}\langle \mathbf{x},\mathbf{x_i}\rangle - 
+  \frac{1}{m_-}\sum_{\{i|y_i=-1\}}\langle \mathbf{x}, \mathbf{x_i} \rangle + b
+  \right ) \\
+  =&sgn\left ( \frac{1}{m_+}\sum_{\{i|y_i=+1\}} k(x,x_i) - 
+  \frac{1}{m_-}\sum_{\{i|y_i=-1\}} k(x, x_i) + b
+  \right )
+\end{array}
+$$
+
+---
+
+$$y = sgn\left ( \frac{1}{m_+}\sum_{\{i|y_i=+1\}} k(x,x_i) - 
+  \frac{1}{m_-}\sum_{\{i|y_i=-1\}} k(x,x_i) + b
+  \right )$$
+
+Podemos también hacer lo mismo con el término $b$, es decir
+
+$$
+b=\frac{1}{2}\left (
+  \frac{1}{m_-^2}\sum_{\{(i,j)|y_i=y_j=-1\}} k(x_i,x_j)  - 
+  \frac{1}{m_+^2}\sum_{\{(i,j)|y_i=y_j=+1\}} k(x_i,x_i)
+  \right )
+$$
+
+
+
+## Caso No Linealmente separable
 
 En esta sesión, nos concentraremos en métodos que escogen $y$ tal que $(x,y)$ es *similar* a los ejemplos de entrenamiento.
 
@@ -84,6 +169,27 @@ $$
     };
 \end{tikzpicture}
 
+
+## Mapeando al espacio de características
+
+
+- No todos los problemas son linealmente separables
+- No siempre $\mathcal{X}$ es un espacio con producto interno
+
+**Enfoque basado en funciones de Kernel**
+
+- Escoger un mapeo a algún espacio de características que sí tenga estas propiedades
+
+\begin{tikzpicture}[remember picture, overlay]
+    
+  \node[above=1.0cm] at (current page.south) 
+  {
+      \includegraphics[width=0.5\textwidth]{nonlinear5.png}
+  };
+  \node[below=-1cm,font=\fontsize{5pt}{5pt}\selectfont] at (current page.south)  {Fuente fuente XXX};
+\end{tikzpicture}
+
+
 ---
 
 **Ejemplos**
@@ -112,108 +218,7 @@ La elipse (2D) es transformada en un hiperplano (3D), reduciendo el problema a e
   \node[below=-0.5cm, left=-3.0cm,font=\fontsize{5pt}{5pt}\selectfont] at (current page.south)  {Fuente fuente \textit{Hastie et al., 2017}};
 \end{tikzpicture}
 
----
 
-### Un algoritmo simple de clasificación
-
-
-Suponga que $\mathcal{X}\subset \mathbb{R}^n$ y las dos clases son separables linealmente.
-
-$$
-\begin{array}{ccc}
-  \mathbf{c}_+=\frac{1}{m_+}\sum_{\{i|y_i=+1\}}\mathbf{x_i}& & \mathbf{c}_-=\frac{1}{m_-}\sum_{\{i|y_i=-1\}}\mathbf{x_i}\\
-  \mathbf{c}=\frac{1}{2}(\mathbf{c}_+ + \mathbf{c}_-)&&
-\end{array}
-$$
-
-- Suponemos además que ambas clases tienen observaciones ($\mathbf{c}_+,\mathbf{c}_->0$)
-
-
-\begin{tikzpicture}[remember picture, overlay]
-    
-  \node[above=0.8cm] at (current page.south) 
-  {
-      \includegraphics[width=0.4\textwidth]{parzen_algo.png}
-  };
-  \node[below=-1cm,font=\fontsize{5pt}{5pt}\selectfont] at (current page.south)  {Fuente fuente XXX};
-\end{tikzpicture}
-
----
-
-Asignaremos el nuevo punto $\mathbf{x}$ a la clase cuya media esté  más cerca.
-
-Formularemos esta tarea en términos del producto interno $\langle .,.\rangle$
-
-Para obtener la clase, revisaremos si el **ángulo** entre el vector que conecta punto central $\mathbf{c}$ con $\mathbf{x}$ y aquel que conecta los centros de ambas clases es menor que $\pi/2$.
-
-\begin{tikzpicture}[remember picture, overlay]
-    
-  \node[above=0.9cm] at (current page.south) 
-  {
-      \includegraphics[width=0.22\textwidth]{ampliacion_angulo.png}
-  };
-  \node[below=-1cm,font=\fontsize{5pt}{5pt}\selectfont] at (current page.south)  {Fuente fuente XXX};
-\end{tikzpicture}
-
----
-
-En terminos formales, lo anterior equivale a 
-
-$$
-\begin{array}{cc}
-  y=&sgn(\langle (\mathbf{x}-\mathbf{c}), (\mathbf{c}_+-\mathbf{c}_-)\rangle) \\
-  =& sgn(\langle (\mathbf{x}-\frac{1}{2}(\mathbf{c}_+ + \mathbf{c}_-)), (\mathbf{c}_+-\mathbf{c}_-)\rangle) \\
-  =& sgn(\langle\mathbf{x}, \mathbf{c}_+\rangle-\langle\mathbf{x}, \mathbf{c}_-\rangle- \frac{1}{2}\left (\Vert\mathbf{c}_+\Vert^2- \Vert\mathbf{c}_-\Vert^2 \right )) \\
-=& sgn(\langle\mathbf{x}, \mathbf{c}_+\rangle-\langle\mathbf{x}, \mathbf{c}_-\rangle + b)  
-\end{array}
-$$
-
-Podemos reescribir la función de decisión anterior, sustituyendo $\mathbf{c}_+$ y $\mathbf{c}_-$
-
-$$
-\begin{array}{cc}
-  y=&sgn\left ( \frac{1}{m_+}\sum_{\{i|y_i=+1\}}\langle \mathbf{x},\mathbf{x_i}\rangle - 
-  \frac{1}{m_-}\sum_{\{i|y_i=-1\}}\langle \mathbf{x}, \mathbf{x_i} \rangle + b
-  \right ) \\
-  =&sgn\left ( \frac{1}{m_+}\sum_{\{i|y_i=+1\}} k(x,x_i) - 
-  \frac{1}{m_-}\sum_{\{i|y_i=-1\}} k(x, x_i) + b
-  \right )
-\end{array}
-$$
-
----
-
-$$y = sgn\left ( \frac{1}{m_+}\sum_{\{i|y_i=+1\}} k(x,x_i) - 
-  \frac{1}{m_-}\sum_{\{i|y_i=-1\}} k(x,x_i) + b
-  \right )$$
-
-Podemos también hacer lo mismo con el término $b$, es decir
-
-$$
-b=\frac{1}{2}\left (
-  \frac{1}{m_-^2}\sum_{\{(i,j)|y_i=y_j=-1\}} k(x_i,x_j)  - 
-  \frac{1}{m_+^2}\sum_{\{(i,j)|y_i=y_j=+1\}} k(x_i,x_i)
-  \right )
-$$
-
-## Mapeando al espacio de características
-
-
-- No todos los problemas son linealmente separables
-- No siempre $\mathcal{X}$ es un espacio con producto interno
-
-**Enfoque basado en funciones de Kernel**
-
-- Escoger un mapeo a algún espacio de características que sí tenga estas propiedades
-
-\begin{tikzpicture}[remember picture, overlay]
-    
-  \node[above=1.0cm] at (current page.south) 
-  {
-      \includegraphics[width=0.5\textwidth]{nonlinear5.png}
-  };
-  \node[below=-1cm,font=\fontsize{5pt}{5pt}\selectfont] at (current page.south)  {Fuente fuente XXX};
-\end{tikzpicture}
 
 ---
 

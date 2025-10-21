@@ -150,34 +150,7 @@ $$h_{MAP}=\underset{h\in H}{\operatorname{argmax}}P(h|D)$$
 
 La clasificación más probable se obtiene combinando todas las hipotesis, ponderadas por sus probabilidades a posteriori.
 
-## Clasificador Bayesiano Óptimo
 
-$$\underset{v_j\in V}{\operatorname{argmax}} \sum_{h_i\in H}P(v_j|h_i)P(h_i|D)$$
-
-- $v_j$ son las posibles clases en que puede ser etiquetada la instancia
-- Las hipotesis son funciones, en nuestro caso, de clasificación (e.g. hiperplanos).
-
-## Ejemplo
-
-$$
-\begin{array}{ccc} 
-P(h_1|D)=0.4,& P(\ominus|h_1)=0,& P(\oplus|h_1)=1\\
-P(h_2|D)=0.3,& P(\ominus|h_2)=1,& P(\oplus|h_2)=0\\
-P(h_3|D)=0.3,& P(\ominus|h_3)=1,& P(\oplus|h_3)=0
-\end{array}
-$$ 
-
-Entonces
-
-$$\sum_{h_i\in H}P(\oplus|h_i)P(h_i|D)=0.4$$
-
-$$\sum_{h_i\in H}P(\ominus|h_i)P(h_i|D)=0.6$$
-
----
-
-$$\underset{v_j\in V}{\operatorname{argmax}} \sum_{h_i\in H}P(v_j|h_i)P(h_i|D)=\ominus$$
-
-mientras que la $h_{MAP}$ indicaría que la instancia es etiquetada como $\oplus$ 
 
 ## Clasificador Bayesiano Ingenuo
 

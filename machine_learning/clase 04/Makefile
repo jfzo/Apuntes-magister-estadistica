@@ -40,7 +40,7 @@ endif
 PANDOC_OPTIONS=--standalone -f markdown+pipe_tables+backtick_code_blocks+auto_identifiers+strikeout+yaml_metadata_block+implicit_figures+all_symbols_escapable+link_attributes+smart+fenced_divs
 PANDOC_HTML_OPTIONS=--to html5
 PANDOC_PDF_OPTIONS=
-PANDOC_XELATEX_PDF_OPTIONS=--dpi=300 --slide-level 2 --toc --citeproc --listings --shift-heading-level=0 --data-dir=./pandoc --template templates/default_mod.latex -H pandoc/templates/preamble.tex --pdf-engine lualatex -V classoption:aspectratio=169 -t beamer
+PANDOC_XELATEX_PDF_OPTIONS=--dpi=300 --slide-level 2 --toc --citeproc --listings --shift-heading-level=0 --data-dir=./pandoc --template templates/default_mod.latex -H pandoc/templates/preamble.tex --pdf-engine lualatex -V classoption:aspectratio=169 -V classoption:t -t beamer
 PANDOC_DOCX_OPTIONS=
 PANDOC_RTF_OPTIONS=
 PANDOC_ODT_OPTIONS=
