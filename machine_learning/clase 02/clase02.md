@@ -2,7 +2,7 @@
 title: Clasificador Naive-Bayes
 topic: EST852 -- Machine Learning
 author: Juan Zamora O.
-date: Octubre, 2024.
+date: 
 fonttheme: "professionalfonts"
 fontsize: 11pt
 theme: default
@@ -12,7 +12,6 @@ linkstyle: bold
 aspectratio: 169
 titlegraphic: logosAzul.png
 logo: logoAzul.png
-section-titles: false
 toc: true
 toc-title: Estructura de la Presentación
 section-titles: false
@@ -21,7 +20,7 @@ section-titles: false
 # Introducción
 
 <!--
-  pandoc -t beamer ./clase02.md -o clase02.pdf --katex --slide-level=2
+  make clase02.pdf
  -->
 
 - Los métodos bayesianos combinan conocimiento previo (probabilidades apriori) con datos observados
