@@ -1,0 +1,8 @@
+graph LR
+    PCR((Riesgo cardiaco pre-cirugía)) --> AT((Tipo anestesia))
+    PCR --> HS((Estado cardiaco))
+    SD((Duración cirugía)) --> FB((Balance fluidos post))
+    AT --> FB
+    FB --> HS
+    SD --> HS
+    HS --> MC((Complicación mayor))
