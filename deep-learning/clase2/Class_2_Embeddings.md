@@ -1,12 +1,23 @@
 ---
-title: Embeddings & Representation Learning
-subtitle: Words as vectors
-author: Deep Learning Course
-date: 
-theme: Madrid
-colortheme: default
-fonttheme: professionalfonts
+title: EST-744
+subtitle: Embeddings & Representation Learning
+author: Juan Zamora O.
+date: Deep Learning
+fonttheme: "professionalfonts"
+fontsize: 11pt
+theme: default
+innertheme: circles
+urlcolor: blue
+linkstyle: bold
+aspectratio: 169
+titlegraphic: logosAzul.png
+logo: logoAzul.png
+section-titles: false
+toc: false
+toc-depth: 1
+toc-title: Estructura de la Presentación
 ---
+
 
 # Introduction
 
