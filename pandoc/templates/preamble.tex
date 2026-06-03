@@ -44,6 +44,9 @@ ItalicFont = *-SemiBoldItalic
 \usetikzlibrary{matrix,calc,tikzmark,arrows,shapes,backgrounds}
 \usetikzlibrary{fit, arrows.meta, shapes}        
 
+\setbeamertemplate{title page}[default]
+\addtobeamertemplate{title page}{\thispagestyle{empty}}{}
+
 
 \setbeamertemplate{footline}{
       \leavevmode%
@@ -55,8 +58,13 @@ ItalicFont = *-SemiBoldItalic
         \usebeamerfont{title in head/foot}\insertshorttitle
       \end{beamercolorbox}%
       \begin{beamercolorbox}[wd=.333333\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
-        \usebeamerfont{date in head/foot}\insertshortdate{}\hspace*{2em}
-        \insertframenumber{} % Shows only current frame number
+        \usebeamerfont{date in head/foot}%\insertshortdate{}\hspace*{2em}
+        \insertframenumber{} \hspace*{4em}% Shows only current frame number
       \end{beamercolorbox}}%
       \vskip0pt%
     }
+
+
+\let\oldShaded\Shaded
+\let\endoldShaded\endShaded
+\renewenvironment{Shaded}{\begin{oldShaded}\scriptsize}{\end{oldShaded}}

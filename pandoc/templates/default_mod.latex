@@ -412,8 +412,8 @@ $if(logo)$
 %\logo{\includegraphics{$logo$}}
     \logo{
 	\begin{tikzpicture}[overlay,remember picture]
-		\node[opacity=0.4,right=-0.6cm, above=0.07cm, xshift=-0.6cm] at (current page.south east){
-    			\includegraphics[height=0.8cm]{../pandoc/templates/$logo$}
+		\node[opacity=0.4,above=-1.1cm, xshift=-0.5cm] at (current page.north east){
+    			\includegraphics[height=0.9cm]{../pandoc/templates/$logo$}
         };
 	\end{tikzpicture}
     }
