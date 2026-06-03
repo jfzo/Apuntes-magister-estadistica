@@ -34,6 +34,7 @@ El desafío fundamental es que las palabras son símbolos discretos sin estructu
 **Enfoques tradicionales** (insuficientes):
 
 - **Codificación one-hot**: "gato" → [0, 0, ..., 1, 0, ..., 0] 
+
   - Vocabulario de 10,000 palabras = 10,000 dimensiones
   - No captura relaciones semánticas (todas las palabras equidistantes)
   - Vectores enormes y dispersos (99.99% ceros)
@@ -79,6 +80,7 @@ $$\text{similaridad} \propto \frac{1}{1 + \text{distancia}}$$
 \vspace{0.2cm}
 
 **Ejemplo práctico**:
+
 - "gato" aparece con: "mascota", "ronroneo", "felino", "suave"
 - "perro" aparece con: "mascota", "ladrido", "canino", "leal"
 - **Contexto compartido** → los vectores deberían ser cercanos
@@ -104,14 +106,12 @@ Oración: "Adoro mi [gato] muy tierno"
 Tarea: Dado "gato" → predecir palabras contextuales
 ```
 
-\vspace{0.3cm}
+**Arquitectura de la red**
 
-**Arquitectura de la red**:
 1. Entrada: palabra objetivo codificada one-hot
 2. Capa oculta: matriz de embeddings $W \in \mathbb{R}^{|V| \times d}$ (|V| = vocab, d = dim embedding)
 3. Salida: distribución de probabilidad sobre palabras contextuales
 
-\vspace{0.2cm}
 
 **Truco elegante**: Después del entrenamiento, descartamos la capa de salida y usamos los **pesos de la capa oculta como embeddings**.
 
@@ -152,12 +152,6 @@ Piensa en cada dimensión del embedding como codificar un atributo semántico (n
 - Sumar "mujer" añade "feminidad"
 - Resultado: "autoridad" + "feminidad" ≈ "reina"
 
----
-
-**Otras relaciones capturadas**:
-- París - Francia + Londres ≈ Inglaterra (relaciones geográficas)
-- malo - bueno ≈ triste - feliz (analogías de sentimiento)
-- programador - programación + música ≈ músico (roles vs. dominios)
 
 \vspace{0.2cm}
 
@@ -228,7 +222,6 @@ keras.layers.Embedding(
    - `trainable=True` solo si dataset es suficientemente grande
    - Típicamente: `trainable=False` para datasets pequeños
 
----
 
 # Agregación a Nivel de Documento
 
@@ -264,6 +257,7 @@ Palabras comunes (artículos) contribuyen menos; palabras discriminativas contri
 ### Opción 3: Pooling Aprendido
 
 Permitir que la red aprenda cómo combinar embeddings de palabra:
+
 - **Max pooling**: Tomar el máximo por dimensión
 - **Attention pooling**: Aprender pesos de importancia (veremos en clases posteriores)
 
@@ -282,6 +276,7 @@ Permitir que la red aprenda cómo combinar embeddings de palabra:
 **Dataset**: IMDb (25,000 reseñas para entrenamiento, 25,000 para prueba)
 
 **Pipeline propuesto**:
+
 1. Cargar embeddings pre-entrenados (Word2Vec)
 2. Tokenizar y convertir reseñas a secuencias de índices
 3. Agregar embeddings (promedio simple)
