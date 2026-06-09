@@ -251,8 +251,10 @@ $endif$
 
 $if(graphics)$
 \usepackage{graphicx,grffile}
-
-\graphicspath{ {$if(imagepath)$$imagepath$$else$./$endif$} } 
+$if(graphicspath)$
+\graphicspath{{$graphicspath$}}
+$endif$
+%\graphicspath{ {$if(imagepath)$$imagepath$$else$./$endif$} } 
 
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -267,6 +269,7 @@ $if(graphics)$
 \def\fps@figure{htbp}
 \makeatother
 $endif$
+
 
 $if(links-as-notes)$
 % Make links footnotes instead of hotlinks:
