@@ -17,6 +17,7 @@ toc: false
 toc-depth: 1
 toc-title: Estructura de la Presentación
 graphics: true
+linespread: 1.2
 ---
 
 # Introducción
@@ -47,13 +48,13 @@ Los embeddings promediados son casi idénticos, ¡pero significan lo opuesto!
 
 Una neurona *feedforward* (Clase 1) solo mira la entrada actual. Una **neurona recurrente** además mira su **propia salida del paso anterior**:
 
-\vspace{0.2cm}
 
 \begin{center}
 \includegraphics[width=0.78\textwidth]{rnn_neuron.png}
 \end{center}
 
-\vspace{0.2cm}
+
+---
 
 - La conexión que vuelve sobre sí misma es el **bucle recurrente**
 - Permite que la neurona tenga **memoria**: lo que calculó antes influye en lo que calcula ahora
@@ -98,19 +99,16 @@ En cada instante de tiempo $t$, la neurona combina **dos fuentes de información
 
 El bucle es difícil de visualizar. El truco es **"desplegarlo"** (*unrolling*) y dibujar una copia de la neurona por cada paso temporal.
 
-\vspace{0.2cm}
 
 \begin{center}
 \includegraphics[width=0.92\textwidth]{rnn_unrolled.png}
 \end{center}
 
-\vspace{0.2cm}
+---
 
 - **Clave**: la celda $A$ es **la misma** en cada paso → mismos pesos $W_x, W_h, b$
 - Esto se llama **compartición de parámetros** (*parameter sharing*)
 - Permite procesar secuencias de **cualquier longitud** con un número fijo de parámetros
-
----
 
 **Analogía**: como leer un libro con un solo cerebro. No usas un cerebro distinto por página; el mismo cerebro actualiza su comprensión página a página.
 
@@ -124,7 +122,6 @@ Una RNN mantiene un **estado oculto** que evoluciona mientras lee palabras:
 
 $$h_t = \tanh(W_h \cdot h_{t-1} + W_x \cdot x_t + b)$$
 
-\vspace{0.2cm}
 
 ```
 "Me encantan los perros"
@@ -134,7 +131,7 @@ h_0 (inicio) → h_1 (tras "Me") → h_2 (tras "encantan") → h_3 (tras "perros
               salida_1            salida_2                salida_3
 ```
 
-\vspace{0.3cm}
+\vspace{0.2cm}
 
 - **Estado oculto** $h_t$: resume "lo que sabemos hasta ahora"
 - **Nueva palabra** $x_t$: actualiza el estado oculto
@@ -230,9 +227,8 @@ model = keras.Sequential([
 ])
 ```
 
-\vspace{0.3cm}
-
 **`return_sequences`**:
+
 - `True`: retorna estado oculto en cada paso temporal (para apilar)
 - `False`: retorna solo el estado oculto final (para clasificación)
 
@@ -282,153 +278,10 @@ Filtro (tamaño 2): detecta bigramas
 **Datos**: 25.000 entrenamiento, 25.000 prueba
 
 **Tres enfoques para comparar**:
-1. Embeddings promediados + Dense (baseline de Clase 2)
-2. LSTM
-3. CNN
 
-
-
-# Ejemplo Práctico: Implementación LSTM
-
-## Construir un Clasificador LSTM
-
-```python
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-
-# Cargar conjunto de datos IMDb
-(x_train, y_train), (x_test, y_test) = \
-    keras.datasets.imdb.load_data(num_words=5000)
-
-# Índice inverso de palabras para recuperar palabras
-word_index = keras.datasets.imdb.get_word_index()
-reverse_word_index = dict([(value, key) for (key, value) 
-                           in word_index.items()])
-
-def decode_review(review_sequence):
-    return ' '.join([reverse_word_index.get(i - 3, '?') 
-                     for i in review_sequence])
-
-# Rellenar secuencias a longitud fija
-max_length = 200
-x_train_padded = pad_sequences(x_train, maxlen=max_length)
-x_test_padded = pad_sequences(x_test, maxlen=max_length)
-
-print(f"Forma rellenada: {x_train_padded.shape}")  # (25000, 200)
-```
-
-
-
-# Ejemplo Práctico: Modelo LSTM
-
-## Definir y Entrenar
-
-```python
-# Construir modelo LSTM
-model = keras.Sequential([
-    keras.layers.Embedding(input_dim=5000, 
-                          output_dim=128, 
-                          input_length=max_length),
-    keras.layers.LSTM(64, dropout=0.2, recurrent_dropout=0.2),
-    keras.layers.Dense(32, activation='relu'),
-    keras.layers.Dropout(0.5),
-    keras.layers.Dense(1, activation='sigmoid')
-])
-
-model.compile(
-    loss='binary_crossentropy',
-    optimizer='adam',
-    metrics=['accuracy']
-)
-
-# Entrenar
-history = model.fit(
-    x_train_padded, y_train,
-    epochs=5,
-    batch_size=32,
-    validation_split=0.2,
-    verbose=1
-)
-
-# Evaluar
-test_loss, test_acc = model.evaluate(x_test_padded, y_test)
-print(f"Precisión en prueba: {test_acc:.4f}")
-```
-
-
-
-# Ejemplo Práctico: Implementación CNN
-
-## CNN para Clasificación de Sentimientos
-
-```python
-# Modelo CNN con múltiples tamaños de filtro
-model = keras.Sequential([
-    keras.layers.Embedding(input_dim=5000,
-                          output_dim=128,
-                          input_length=max_length),
-    
-    # Múltiples capas convolucionales con diferentes tamaños de filtro
-    keras.layers.Conv1D(filters=128, kernel_size=3, 
-                        activation='relu'),
-    keras.layers.GlobalMaxPooling1D(),
-    
-    keras.layers.Dense(64, activation='relu'),
-    keras.layers.Dropout(0.5),
-    keras.layers.Dense(1, activation='sigmoid')
-])
-
-model.compile(
-    loss='binary_crossentropy',
-    optimizer='adam',
-    metrics=['accuracy']
-)
-
-history = model.fit(
-    x_train_padded, y_train,
-    epochs=5,
-    batch_size=32,
-    validation_split=0.2
-)
-
-test_loss, test_acc = model.evaluate(x_test_padded, y_test)
-print(f"Precisión en prueba: {test_acc:.4f}")
-```
-
-
-
-# Ejemplo Práctico: Evaluación
-
-## Comparar Enfoques
-
-```python
-# Comparar tres modelos en conjunto de prueba
-resultados_modelos = {
-    'Embeddings Promediados': 0.88,
-    'LSTM': 0.92,
-    'CNN': 0.91
-}
-
-import matplotlib.pyplot as plt
-plt.bar(resultados_modelos.keys(), resultados_modelos.values())
-plt.ylabel('Precisión')
-plt.title('Resultados de Clasificación de Sentimientos')
-plt.ylim([0.85, 0.95])
-plt.show()
-```
-
-\vspace{0.3cm}
-
-**Resultados típicos**:
-- Embeddings promediados: ~88%
-- LSTM: ~92%
-- CNN: ~91%
-
-\vspace{0.3cm}
-
-RNN captura orden de palabras; CNN es más rápido pero ligeramente inferior
+1. Embeddings promediados + Dense (realizado en Clase anterior)
+2. LSTM (visto en sesión actual)
+3. CNN (a realizar por c/estudiante, integrando contenidos ya vistos)
 
 
 
@@ -438,8 +291,6 @@ RNN captura orden de palabras; CNN es más rápido pero ligeramente inferior
 
 **Problema**: Las reseñas tienen diferentes longitudes (50-2000 palabras)
 
-\vspace{0.3cm}
-
 **Solución 1: Relleno**
 ```python
 x_padded = pad_sequences(x, maxlen=200, padding='post')
@@ -447,17 +298,14 @@ x_padded = pad_sequences(x, maxlen=200, padding='post')
 # Reseñas largas: truncar a 200 palabras
 ```
 
-\vspace{0.3cm}
-
 **Solución 2: Enmascaramiento**
 ```python
 keras.layers.Masking(mask_value=0.0)
 # Decirle a la red: ignora los ceros rellenos en el cálculo
 ```
 
-\vspace{0.3cm}
-
 **Compensación**:
+
 - Longitud fija: simple, pero pierde información
 - Relleno: añade ruido (ceros)
 - Enmascaramiento: dice al modelo ignorar el relleno
@@ -486,7 +334,7 @@ Atrás:     buena ← muy ← fue ← película ← La
 
 \vspace{0.3cm}
 
-Concatenar adelante + atrás → contexto más rico
+Concatenar adelante + atrás $\longrightarrow$ contexto más rico
 
 ```python
 keras.layers.Bidirectional(
@@ -518,60 +366,19 @@ model = keras.Sequential([
 
 \vspace{0.3cm}
 
-**Nota**: `return_sequences=True` → pasar todos los pasos temporales a la siguiente capa
+**Nota**: Con `return_sequences=True` se pasan todos los pasos temporales a la siguiente capa
 
 
 
 # Resumen de Conceptos Clave
 
-## Lo Que Hemos Aprendido
+## Ideas clave
 
-ok Las RNN procesan secuencias paso a paso
-
-ok Las LSTM resuelven el problema de gradientes desvanecientes con compuertas
-
-ok Las CNN detectan patrones de n-gramas eficientemente
-
-ok Relleno y enmascaramiento para longitudes variables
-
-ok Procesamiento bidireccional captura contexto en ambas direcciones
-
-ok Apilar capas aumenta la capacidad
-
-## Comparación de Rendimiento
-
-- Embeddings promediados: baseline, rápido, interpretable
-- LSTM: mejor precisión, más lento, captura contexto a largo plazo
-- CNN: buena precisión, más rápido, enfocado en n-gramas
-
-
-
-# Visualización: Pesos de Atención
-
-## Interpretar Decisiones LSTM
-
-```python
-# Extraer estados ocultos (requiere modificar modelo)
-outputs = model.layers[2].output
-attention_model = keras.Model(
-    inputs=model.input,
-    outputs=outputs
-)
-
-# Obtener pesos de atención
-hidden_states = attention_model.predict(x_test_padded[:10])
-
-# Visualizar qué palabras importan
-import matplotlib.pyplot as plt
-plt.imshow(hidden_states[0])
-plt.title('Estados Ocultos Sobre la Secuencia')
-plt.colorbar()
-plt.show()
-```
-
-\vspace{0.3cm}
-
-**Intuición**: Se puede ver qué pasos temporales tuvieron cambios grandes en el estado
+* Las RNN procesan secuencias paso a paso
+* Las LSTM resuelven el problema de gradientes desvanecientes con compuertas de olvido
+* Uso de relleno y enmascaramiento para longitudes variables
+* Procesamiento bidireccional captura contexto en ambas direcciones
+* Apilar capas aumenta la capacidad
 
 
 
@@ -588,35 +395,6 @@ plt.show()
 
 
 
-# Ejercicios para la Clase 3
-
-## Tareas Prácticas
-
-1. **Comparación de arquitecturas**: Entrenar los tres modelos (promediado, LSTM, CNN) lado a lado
-
-2. **Bidireccional**: Comparar LSTM unidireccional vs. bidireccional
-
-3. **Apilar capas**: Añadir una segunda capa LSTM. ¿Ayuda? ¿Cuándo perjudica?
-
-4. **Longitud de secuencia**: Variar max_length (100, 200, 500). ¿Compensación precisión vs. velocidad?
-
-5. **Ajuste de dropout**: Probar tasas de dropout 0.0, 0.2, 0.5. ¿Cuál previene sobreajuste mejor?
-
-6. **Afinación de embeddings**: Entrenar embeddings vs. usar congelados pre-entrenados
-
-7. **Predecir e interpretar**: Elegir una reseña, visualizar qué palabras influyeron en la predicción
-
-
-# Preguntas y Discusión
-
-¡Gracias!
-
-**Conclusión clave**: La estructura de la secuencia importa. Las RNN/LSTM la capturan, pero son lentas. Las CNN son rápidas pero limitadas. La atención resuelve ambos problemas.
-
-\vspace{0.5cm}
-
-Siguiente: El mecanismo de atención que impulsa el NLP moderno
-
 # Referencias Completas
 
 Para que los estudiantes profundicen por su cuenta:
@@ -626,6 +404,8 @@ Para que los estudiantes profundicen por su cuenta:
 - **Elman, J. L. (1990).** "Finding Structure in Time". *Cognitive Science*, 14(2), 179–211. Artículo fundacional que introduce la RNN simple (o "de Elman").
 
 - **Olah, C. (2015).** "Understanding LSTM Networks". Blog *colah's blog*: `https://colah.github.io/posts/2015-08-Understanding-LSTMs/`. La explicación visual más citada sobre RNN y LSTM.
+
+---
 
 - **Karpathy, A. (2015).** "The Unreasonable Effectiveness of Recurrent Neural Networks". `https://karpathy.github.io/2015/05/21/rnn-effectiveness/`. Complemento motivacional con ejemplos sorprendentes de generación de texto.
 
