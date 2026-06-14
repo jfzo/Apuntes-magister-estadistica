@@ -1,5 +1,5 @@
-PANDOC_OPTIONS=--standalone --highlight-style pygments -f markdown+pipe_tables+backtick_code_blocks+auto_identifiers+strikeout+yaml_metadata_block+implicit_figures+all_symbols_escapable+link_attributes+smart+fenced_divs 
-PANDOC_XELATEX_PDF_OPTIONS=--dpi=300 --slide-level 2 --toc --citeproc --highlight-style=pygments --shift-heading-level=0 --data-dir=../pandoc --template templates/default_mod.latex -H ../pandoc/templates/preamble.tex --pdf-engine xelatex -V classoption:aspectratio=169 -V classoption=t -t beamer
+PANDOC_OPTIONS=--standalone --syntax-highlighting=pygments -f markdown+pipe_tables+backtick_code_blocks+auto_identifiers+strikeout+yaml_metadata_block+implicit_figures+all_symbols_escapable+link_attributes+smart+fenced_divs 
+PANDOC_XELATEX_PDF_OPTIONS=--dpi=300 --slide-level 2 --toc --citeproc --syntax-highlighting=pygments --shift-heading-level=0 --data-dir=../pandoc --template templates/default_mod.latex -H ../pandoc/templates/preamble.tex --pdf-engine xelatex -V classoption:aspectratio=169 -V classoption=t -t beamer
 #pandoc $(PANDOC_OPTIONS) $(PANDOC_XELATEX_PDF_OPTIONS) -o $@ $<
 
 SRC_DIR := .

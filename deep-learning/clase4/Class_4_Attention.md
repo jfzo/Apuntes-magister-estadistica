@@ -1,550 +1,378 @@
 ---
-title: Attention Mechanisms
-subtitle: The breakthrough that changed NLP
-author: Deep Learning Course
-date: 
-theme: Madrid
-colortheme: default
-fonttheme: professionalfonts
+title: EST-744
+subtitle: Mecanismos de Atención
+author: Juan Zamora O.
+date: Deep Learning
+fonttheme: "professionalfonts"
+fontsize: 11pt
+theme: default
+innertheme: circles
+urlcolor: blue
+linkstyle: bold
+aspectratio: 169
+titlegraphic: logosAzul.png
+logo: logoAzul.png
+section-titles: false
+toc: false
+graphics: true
 ---
 
-# Introduction
+# Introducción
 
-## The Problem: Sequential Bottleneck
+## El Problema: Cuello de Botella Secuencial
 
-RNNs process one word at a time, creating a bottleneck:
+Las RNN procesan una palabra a la vez, creando un cuello de botella:
 
-```
-t=0: "The"     → h_1 (small state, remembers nothing)
-t=1: "movie"   → h_2 (remembers "The", forgets distant past)
-t=2: "was"     → h_3
-...
-t=100: "great" → h_100 (has to remember everything from 100 steps!)
-```
+\begin{center}
+\includegraphics[width=0.95\textwidth]{d1_rnn_bottleneck-1.png}
+\end{center}
 
 \vspace{0.3cm}
 
-**Problems**:
-- Can't parallelize (must process sequentially)
-- Distant context fades (vanishing gradients)
-- Slow training on long sequences
+**Problemas**:
+
+- No se puede paralelizar (hay que procesar en secuencia)
+- El contexto lejano se desvanece (gradientes desvanecientes)
+- Entrenamiento lento en secuencias largas
 
 \vspace{0.3cm}
 
-**What if every word could "look at" every other word simultaneously?**
+**¿Qué pasaría si cada palabra pudiera "mirar" a todas las demás al mismo tiempo?**
 
----
+\vspace{0.2cm}
+\footnotesize *Vaswani et al. (2017), "Attention Is All You Need", NeurIPS. El artículo que introdujo los Transformers — disponible en \texttt{arxiv.org/abs/1706.03762}*
 
-# The Attention Idea
+# La Idea de la Atención
 
-## Soft Selection
+## Selección Suave
 
-Instead of reading left-to-right, use **attention** to focus on relevant words:
+En lugar de leer de izquierda a derecha, la **atención** permite enfocarse en las palabras relevantes:
 
-```
-To understand "It was great", focus on:
-- "great" → strong signal (positive sentiment)
-- "was" → modifier (past tense context)
-- "It" → subject (less important)
-- Ignore: "a", "the" (filler words)
-```
+\begin{center}
+\includegraphics[width=0.72\textwidth]{d2_soft_selection-1.png}
+\end{center}
 
 \vspace{0.3cm}
 
-**Attention as a spotlight**: 
-- Query: "What am I trying to understand?" (current position)
-- Keys: "What is each word?" (all words)
-- Values: "What information do they have?" (embeddings)
-- Output: Weighted average of relevant words
+**La atención como un foco de luz**:
 
----
+| Componente | Pregunta que responde |
+|---|---|
+| **Consulta** (*Query*) $Q$ | "¿Qué estoy tratando de entender?" |
+| **Clave** (*Key*) $K$ | "¿Qué es cada palabra?" |
+| **Valor** (*Value*) $V$ | "¿Qué información contiene cada palabra?" |
+| **Salida** | Promedio ponderado de las palabras relevantes |
 
-# Self-Attention: Query, Key, Value
+\vspace{0.2cm}
+\footnotesize *Bahdanau, Cho \& Bengio (2015), "Neural Machine Translation by Jointly Learning to Align and Translate", ICLR. El artículo original de atención — \texttt{arxiv.org/abs/1409.0473}*
 
-## The Math (Intuitive)
+# Auto-Atención: Consulta, Clave, Valor
 
-$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+## La Matemática (Intuitiva)
 
-\vspace{0.3cm}
-
-**Step-by-step**:
-1. **Query** $Q$: "What position am I? What am I looking for?"
-2. **Keys** $K^T$: "Match my query against all words"
-3. **Softmax**: Convert to attention weights (0-1, sum=1)
-4. **Values** $V$: Weighted combination of word vectors
-
----
-
-# Attention Visualization
-
-## An Example
-
-```
-Query position: "was"
-
-Sentence: "The movie was great"
-Words:     The    movie   was   great
-
-Step 1: Compute similarity (query vs. each key)
-was vs The:    -0.2
-was vs movie:   0.3
-was vs was:     1.0  (match itself!)
-was vs great:   0.5
-
-Step 2: Apply softmax → [0.05, 0.15, 0.60, 0.20]
-(Higher weights to "was" and "great")
-
-Step 3: Weighted average of values
-output = 0.05*v_the + 0.15*v_movie + 0.60*v_was + 0.20*v_great
-```
-
----
-
-# Multi-Head Attention
-
-## Multiple Perspectives
-
-One attention head may not capture all relationships.
-
-**Solution**: Use multiple heads, each learning different patterns
-
-```
-Head 1: Focus on semantic similarity ("movie" ↔ "film")
-Head 2: Focus on grammatical role (subject, object, verb)
-Head 3: Focus on sentiment modifiers ("very", "great")
-```
+$$\text{Atención}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
 
 \vspace{0.3cm}
 
-```python
-# Each head is independent attention computation
-# Concatenate outputs
-attention_output = concat(head1, head2, head3, ..., head8)
-```
+**Paso a paso**:
 
-\vspace{0.3cm}
+1. **Consulta** $Q$: proyección lineal de la posición actual — "¿qué busco?"
+2. **Producto** $QK^T$: similitud entre la consulta y cada clave — "¿cuánto encaja cada palabra?"
+3. **Escala** $/ \sqrt{d_k}$: evita que los productos internos crezcan demasiado y saturen el softmax
+4. **Softmax**: convierte similitudes en pesos de atención (entre 0 y 1, suman 1)
+5. **Valores** $V$: combinación ponderada de los vectores de palabras
 
-**Why multiple heads?**
-- Capture different aspects of meaning
-- Robustness (if one fails, others compensate)
-- Parallel computation
+\vspace{0.2cm}
+\footnotesize *Vaswani et al. (2017), sección 3.2. Para una derivación paso a paso: Alammar (2018), "The Illustrated Transformer" — \texttt{jalammar.github.io/illustrated-transformer}*
 
----
+# Ejemplo Numérico de Atención
 
-# Parallelization: The Key Advantage
+## ¿Qué atiende la palabra "fue"?
 
-## RNN vs. Attention
+\begin{center}
+\includegraphics[width=0.88\textwidth]{d3_qkv_example-1.png}
+\end{center}
 
 \vspace{0.2cm}
 
-**RNN** (sequential):
-```
-Step 1: Process "The"    (1 GPU cycle)
-Step 2: Process "movie"  (1 GPU cycle) ← must wait for step 1
-Step 3: Process "was"    (1 GPU cycle) ← must wait for step 2
-...
-Total: 100 steps → 100 cycles
-```
+La representación final de "fue" incorpora información de toda la oración, especialmente de "genial" — capturando la relación semántica entre verbo y adjetivo.
+
+# Atención Multi-Cabezal
+
+## Múltiples Perspectivas Simultáneas
+
+Una sola cabeza de atención no captura todas las relaciones posibles.
+
+**Solución**: usar varias cabezas (*heads*), cada una aprendiendo patrones distintos:
+
+\begin{center}
+\includegraphics[width=0.80\textwidth]{d4_multihead-1.png}
+\end{center}
 
 \vspace{0.3cm}
 
-**Attention** (parallel):
-```
-Compute query, key, value for ALL words simultaneously
-Compute attention scores for ALL pairs simultaneously
-Result: Process whole sentence in a few cycles!
-```
+Las salidas de todas las cabezas se **concatenan** y se proyectan linealmente:
+
+$$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{cabeza}_1, \ldots, \text{cabeza}_h)\, W^O$$
 
 \vspace{0.3cm}
 
-**Speed gain**: 10-50x faster on long sequences
-
----
-
-# Positional Encoding
-
-## How Does Attention Know Order?
-
-Attention ignores position (all words treated equally).
-
-\vspace{0.3cm}
-
-**Solution**: Add **positional encoding** to embeddings
-
-$$PE(pos, 2i) = \sin(pos / 10000^{2i/d})$$
-$$PE(pos, 2i+1) = \cos(pos / 10000^{2i/d})$$
+**¿Por qué múltiples cabezas?**
+- Captura distintas dimensiones del significado en paralelo
+- Robustez: si una cabeza falla, las demás compensan
 
 \vspace{0.2cm}
+\footnotesize *Vaswani et al. (2017), sección 3.3. En el paper original se usan $h=8$ cabezas con $d_k = d_v = 64$.*
 
-**Intuition**: Each position gets a unique sinusoidal pattern
+# Paralelización: La Ventaja Clave
 
-```
-Position 0: [sin(0), cos(0), sin(0), cos(0), ...]
-Position 1: [sin(1), cos(1), sin(1), cos(1), ...]
-Position 2: [sin(2), cos(2), sin(2), cos(2), ...]
-...
-```
+## RNN vs. Atención
 
-\vspace{0.3cm}
+\begin{center}
+\includegraphics[width=0.95\textwidth]{d5_parallel-1.png}
+\end{center}
 
-**Why sinusoids?** Periodicities at different scales capture relative positions
-
----
-
-# The Transformer Block
-
-## Putting It Together
-
-```
-Input → Positional Encoding → Multi-Head Attention → Add & Norm
-   ↓
-Feed-Forward Network → Add & Norm → Output
-```
-
-\vspace{0.3cm}
-
-**Add & Norm**: Residual connection + layer normalization
-
-$$\text{Output} = \text{LayerNorm}(x + \text{Attention}(x))$$
-
-\vspace{0.3cm}
-
-**Why residual?** 
-- Gradients flow better (addition vs. composition)
-- Network learns "refinements" not absolute transformations
-
----
-
-# Attention in Code
-
-## Implementing Self-Attention (Simplified)
-
-```python
-import tensorflow as tf
-from tensorflow import keras
-
-class SelfAttention(keras.layers.Layer):
-    def __init__(self, d_model):
-        super().__init__()
-        self.d_model = d_model
-        self.query = keras.layers.Dense(d_model)
-        self.key = keras.layers.Dense(d_model)
-        self.value = keras.layers.Dense(d_model)
-    
-    def call(self, x):
-        # x shape: (batch, seq_length, d_model)
-        Q = self.query(x)
-        K = self.key(x)
-        V = self.value(x)
-        
-        # Attention scores
-        scores = tf.matmul(Q, K, transpose_b=True)
-        scores = scores / tf.math.sqrt(tf.cast(self.d_model, tf.float32))
-        
-        # Softmax + apply to values
-        weights = tf.nn.softmax(scores, axis=-1)
-        output = tf.matmul(weights, V)
-        
-        return output
-```
-
----
-
-# Transformer Layer in Keras
-
-## Using Built-in Layers
-
-```python
-# MultiHeadAttention is built-in (TensorFlow 2.x)
-attention_layer = keras.layers.MultiHeadAttention(
-    num_heads=8,
-    key_dim=64  # d_model / num_heads
-)
-
-# Self-attention on sequence
-outputs = attention_layer(queries=x, values=x, keys=x)
-```
-
-\vspace{0.3cm}
-
-**Parameters**:
-- `num_heads`: how many independent heads
-- `key_dim`: dimension per head (total = key_dim × num_heads)
-
----
-
-# Practical Example: Sentiment with Attention
-
-## Task and Setup
-
-**Goal**: Sentiment classification with explicit attention mechanism
-
-**Architecture**:
-1. Embedding layer
-2. Positional encoding
-3. Self-attention block
-4. Feed-forward
-5. Classification head
-
----
-
-# Practical Example: Full Model
-
-## Implementation
-
-```python
-import tensorflow as tf
-from tensorflow import keras
-
-vocab_size = 5000
-embedding_dim = 128
-seq_length = 200
-num_heads = 8
-
-# Build attention-based classifier
-model = keras.Sequential([
-    keras.layers.Embedding(vocab_size, embedding_dim),
-    
-    # Add positional encoding (simplified: just concatenate position)
-    # Proper positional encoding: see next slide
-    
-    keras.layers.MultiHeadAttention(
-        num_heads=num_heads,
-        key_dim=embedding_dim // num_heads
-    ),
-    
-    keras.layers.GlobalAveragePooling1D(),
-    
-    keras.layers.Dense(64, activation='relu'),
-    keras.layers.Dropout(0.3),
-    keras.layers.Dense(1, activation='sigmoid')
-])
-
-model.compile(
-    loss='binary_crossentropy',
-    optimizer='adam',
-    metrics=['accuracy']
-)
-```
-
----
-
-# Positional Encoding Implementation
-
-## Adding Position Information
-
-```python
-def positional_encoding(position, d_model):
-    import numpy as np
-    angle_rads = positional_encoding_angles(
-        np.arange(position)[:, np.newaxis],
-        np.arange(d_model)[np.newaxis, :],
-        d_model
-    )
-    # Apply sin to even indices
-    angle_rads[:, 0::2] = np.sin(angle_rads[:, 0::2])
-    # Apply cos to odd indices
-    angle_rads[:, 1::2] = np.cos(angle_rads[:, 1::2])
-    return angle_rads[np.newaxis, ...]
-
-def positional_encoding_angles(pos, i, d_model):
-    import numpy as np
-    return pos / np.power(10000, (2 * (i//2)) / np.float32(d_model))
-
-# Use in model
-pos_encoding = tf.constant(
-    positional_encoding(seq_length, embedding_dim),
-    dtype=tf.float32
-)
-
-# Add to embeddings
-class PositionalEmbedding(keras.layers.Layer):
-    def __init__(self, vocab_size, embedding_dim):
-        super().__init__()
-        self.embedding = keras.layers.Embedding(vocab_size, embedding_dim)
-        self.pos_encoding = pos_encoding
-    
-    def call(self, x):
-        return self.embedding(x) + self.pos_encoding[:, :tf.shape(x)[1], :]
-```
-
----
-
-# Training and Evaluation
-
-## Complete Training Loop
-
-```python
-# Load IMDb data
-(x_train, y_train), (x_test, y_test) = \
-    keras.datasets.imdb.load_data(num_words=vocab_size)
-
-# Pad sequences
-x_train_padded = keras.preprocessing.sequence.pad_sequences(
-    x_train, maxlen=seq_length
-)
-x_test_padded = keras.preprocessing.sequence.pad_sequences(
-    x_test, maxlen=seq_length
-)
-
-# Train
-history = model.fit(
-    x_train_padded, y_train,
-    epochs=3,
-    batch_size=32,
-    validation_split=0.2,
-    verbose=1
-)
-
-# Evaluate
-test_loss, test_acc = model.evaluate(x_test_padded, y_test)
-print(f"Test accuracy: {test_acc:.4f}")
-```
-
-\vspace{0.3cm}
-
-**Expected**: ~91-93% (similar to LSTM, but trained faster)
-
----
-
-# Attention Visualization
-
-## Seeing What the Model Attends To
-
-```python
-# Extract attention weights from layer
-# Create a model that outputs attention weights
-attention_layer = model.layers[1]  # MultiHeadAttention
-
-def get_attention_weights(x):
-    # Build custom model to access attention
-    inputs = keras.Input(shape=(seq_length,), dtype='int32')
-    x = keras.layers.Embedding(vocab_size, embedding_dim)(inputs)
-    attention_out, attention_weights = attention_layer(
-        x, return_attention_scores=True
-    )
-    attention_model = keras.Model(inputs, attention_weights)
-    return attention_model.predict(x)
-
-# Visualize
-weights = get_attention_weights(x_test_padded[:1])
-import matplotlib.pyplot as plt
-plt.imshow(weights[0, 0, :, :], cmap='viridis')  # Head 0
-plt.title('Attention Weights')
-plt.colorbar()
-plt.xlabel('Key Position')
-plt.ylabel('Query Position')
-plt.show()
-```
-
----
-
-# Attention vs. Earlier Approaches
-
-## Performance and Speed Comparison
-
-```
-Model            | Accuracy | Time/Epoch | Parallelizable
-Averaged Embed   | 0.88     | 2 sec      | ✓ (all at once)
-LSTM             | 0.92     | 45 sec     | ✗ (sequential)
-CNN              | 0.91     | 8 sec      | ✓ (parallel)
-Attention        | 0.92     | 10 sec     | ✓ (fully parallel)
-```
-
-\vspace{0.3cm}
-
-**Attention advantages**:
-- Accuracy comparable to LSTM
-- Much faster (parallelizable)
-- Better for long sequences
-- More interpretable (attention weights)
-
----
-
-# Key Concepts Summary
-
-## Attention Recap
-
-✓ Soft selection: focus on relevant words
-
-✓ Query-Key-Value framework
-
-✓ Multi-head attention: multiple perspectives
-
-✓ Positional encoding: preserve order
-
-✓ Self-attention in transformers
-
-✓ Parallelizable architecture
-
-## Why This Matters
-
-Attention is the foundation of modern NLP (BERT, GPT, etc.). Understanding it is critical for Class 5.
-
----
-
-# Common Issues
-
-## Troubleshooting Attention
-
-| Problem | Cause | Solution |
+| Métrica | RNN/LSTM | Atención |
 |---|---|---|
-| All attention to one word | Under-training | Train longer, higher LR |
-| Uniform attention (no focus) | Model too simple | Add more heads, deeper network |
-| Memory error | Too many heads × dimensions | Reduce key_dim or num_heads |
-| Slow training | Implementation inefficiency | Use Keras built-ins, not custom |
+| Procesamiento | Secuencial | **Paralelo** |
+| Ganancia en velocidad | 1× (base) | **10–50×** en secuencias largas |
+| Uso de GPU | Bajo (un paso a la vez) | **Alto** (todos los pares) |
 
----
+# Codificación Posicional
 
-# Exercises for Class 4
+## ¿Cómo Sabe la Atención el Orden?
 
-## Hands-On Tasks
+La atención trata todas las palabras por igual: no tiene noción de posición.
 
-1. **Visualize attention**: Generate attention weights for 10 examples. Do patterns make sense?
+\vspace{0.3cm}
 
-2. **Vary num_heads**: Try 2, 4, 8, 16 heads. Does more always help?
+**Problema**: "El perro mordió al hombre" ≠ "El hombre mordió al perro" producirían la misma representación sin información posicional.
 
-3. **Compare to LSTM**: Train LSTM with same parameters. Speed vs. accuracy?
+\vspace{0.3cm}
 
-4. **Positional encoding ablation**: Train without positional encoding. How much does it help?
+**Solución**: sumar una **codificación posicional** al embedding de cada palabra:
 
-5. **Attention interpretability**: For misclassified examples, what did the model attend to?
+$$PE(\text{pos},\, 2i)   = \sin\!\left(\frac{\text{pos}}{10000^{2i/d}}\right)$$
+$$PE(\text{pos},\, 2i+1) = \cos\!\left(\frac{\text{pos}}{10000^{2i/d}}\right)$$
 
-6. **Scale test**: Train on sequences of length 100, 500, 1000. Attention vs. LSTM speed?
+\vspace{0.2cm}
 
----
+Cada posición recibe un patrón sinusoidal único que varía a distintas frecuencias:
 
-# Next Class Preview
+\begin{center}
+\includegraphics[width=0.82\textwidth]{d9_positional_table-1.png}
+\end{center}
 
-## From Building Blocks to Pre-trained Models
+\vspace{0.2cm}
+\footnotesize *El uso de sinusoides permite al modelo generalizar a secuencias más largas que las vistas en entrenamiento. Ver Vaswani et al. (2017), sección 3.5.*
 
-Attention is powerful, but training from scratch is expensive:
+# El Bloque Transformer
 
-```
-Training BERT from scratch:
-- 100+ GB of text
-- 4-16 TPUs/GPUs
-- Weeks of training
-- Billions of dollars
+## Las Piezas Ensambladas
+
+\begin{center}
+\includegraphics[width=0.62\textwidth]{d6_transformer_block-1.png}
+\end{center}
+
+**Conexión residual y normalización** (*Add & Norm*):
+
+$$\text{Salida} = \text{LayerNorm}\!\left(x + \text{Atención}(x)\right)$$
+
+**¿Por qué residual?** Los gradientes fluyen por la suma (no por composición), lo que facilita el entrenamiento profundo. La red aprende *refinamientos* sobre la entrada, no transformaciones absolutas.
+
+\vspace{0.2cm}
+\footnotesize *He et al. (2016), "Deep Residual Learning for Image Recognition" — origen de las conexiones residuales, aplicadas luego a transformers.*
+
+# API de Atención en Keras
+
+## Usar la Capa Incorporada
+
+TensorFlow 2.x incluye `MultiHeadAttention` lista para usar:
+
+```python
+capa_atencion = keras.layers.MultiHeadAttention(
+    num_heads=8,       # numero de cabezas independientes
+    key_dim=64         # dimension por cabeza (total = key_dim x num_heads)
+)
+
+# Auto-atencion: la secuencia atiende a si misma
+salida = capa_atencion(query=x, value=x, key=x)
 ```
 
 \vspace{0.3cm}
 
-**Class 5: Transformers & Pre-trained Models**
-- Full transformer architecture (encoder + decoder)
-- Pre-trained models (BERT, GPT, etc.)
-- Transfer learning (fine-tuning)
-- Using HuggingFace
+**Parámetros clave**:
 
----
+| Parámetro | Significado | Valor típico |
+|---|---|---|
+| `num_heads` | Cabezas independientes | 4–16 |
+| `key_dim` | Dimensión por cabeza | 32–128 |
+| `dropout` | Regularización en los pesos | 0.1–0.3 |
 
-# Questions & Discussion
+\vspace{0.2cm}
 
-Thank you!
+El código completo del modelo, codificación posicional, entrenamiento y visualización está en **`clase_4_codigo_completo.py`**.
 
-**Key takeaway**: Attention mechanisms let every word see every other word instantly. This parallelization + expressiveness is why transformers dominate modern NLP.
+# Ejemplo Práctico: Clasificación de Sentimientos
+
+## Tarea y Arquitectura
+
+**Objetivo**: clasificar reseñas de IMDb como positivas/negativas usando atención
+
+**Arquitectura del clasificador**:
+
+\begin{center}
+\includegraphics[width=0.65\textwidth]{d7_classifier-1.png}
+\end{center}
+
+\vspace{0.3cm}
+
+**Resultado esperado**: ~91–93% de precisión, entrenamiento **más rápido que LSTM** gracias a la paralelización.
+
+\vspace{0.2cm}
+
+Ver implementación completa en **`clase_4_codigo_completo.py`**, Sección 3.
+
+# Comparación de Enfoques
+
+## Rendimiento y Velocidad
+
+| Modelo | Precisión | Tiempo/época | Paralelizable |
+|---|---|---|---|
+| Embeddings promediados | 0.88 | 2 seg | Ok |
+| LSTM | 0.92 | 45 seg | X (secuencial) |
+| CNN | 0.91 | 8 seg | Ok |
+| **Atención** | **0.92** | **10 seg** | **Ok (totalmente)** |
+
+\vspace{0.3cm}
+
+**Ventajas de la atención**:
+
+- Precisión comparable a LSTM
+- Mucho más rápido (paralelizable)
+- Mejor escalabilidad a secuencias largas
+- **Interpretable**: los pesos de atención muestran en qué se enfocó el modelo
+
+\vspace{0.2cm}
+\footnotesize *Tiempos medidos en GPU NVIDIA T4. En CPU la ganancia relativa es similar pero los tiempos absolutos son mayores.*
+
+# Visualización de los Pesos de Atención
+
+## ¿Qué Está Mirando el Modelo?
+
+Los pesos de atención permiten **interpretar** las decisiones del modelo:
+
+\vspace{0.2cm}
+
+\begin{center}
+\includegraphics[width=0.78\textwidth]{d8_attention_heatmap-1.png}
+\end{center}
+
+\vspace{0.3cm}
+
+Esta interpretabilidad es una ventaja concreta sobre LSTM, donde los estados ocultos son difíciles de leer directamente.
+
+\vspace{0.2cm}
+
+El código para extraer y graficar los pesos está en **`clase_4_codigo_completo.py`**, Sección 5.
+
+\vspace{0.2cm}
+\footnotesize *Clark et al. (2019), "What Does BERT Look at?", ACL. Análisis detallado de qué aprenden las cabezas de atención en modelos pre-entrenados.*
+
+# Resumen de Conceptos Clave
+
+## Lo Que Hemos Aprendido
+
+Ok **Cuello de botella RNN**: procesamiento secuencial limita velocidad y memoria
+
+Ok **Selección suave**: la atención pondera todas las palabras en lugar de elegir una
+
+Ok **Marco Consulta-Clave-Valor**: formalización matemática de la atención
+
+Ok **Atención multi-cabezal**: múltiples perspectivas aprendidas en paralelo
+
+Ok **Codificación posicional**: sinusoides que preservan el orden de la secuencia
+
+Ok **Bloque Transformer**: atención + conexión residual + normalización + FFN
+
+Ok **Paralelización**: 10–50× más rápido que RNN en secuencias largas
+
+## Por Qué Importa
+
+La atención es el **mecanismo central** de BERT, GPT y todos los modelos modernos de NLP. Comprender su funcionamiento es imprescindible para la Clase 5.
+
+# Problemas Comunes
+
+## Diagnóstico
+
+| Problema | Causa | Solución |
+|---|---|---|
+| Toda la atención a una sola palabra | Entrenamiento insuficiente | Entrenar más épocas; aumentar tasa de aprendizaje |
+| Atención uniforme (sin foco) | Modelo muy simple | Agregar más cabezas o capas más profundas |
+| Error de memoria | Muchas cabezas × dimensiones altas | Reducir `key_dim` o `num_heads` |
+| Entrenamiento lento | Implementación ineficiente | Usar capas integradas de Keras, no implementación manual |
+| Sobreajuste severo | Pocos datos o modelo muy grande | Agregar `dropout` en atención y capas densas |
+
+# Ejercicios para la Clase 4
+
+## Tareas Prácticas
+
+1. **Visualizar atención**: obtener pesos de atención para 10 reseñas. ¿Los patrones tienen sentido lingüístico?
+
+2. **Variar `num_heads`**: probar 2, 4, 8 y 16 cabezas. ¿Más siempre es mejor?
+
+3. **Comparar con LSTM**: entrenar LSTM con los mismos hiperparámetros. ¿Cuánto gana la atención en velocidad?
+
+4. **Ablación posicional**: entrenar sin codificación posicional. ¿Cuánto impacta en la precisión?
+
+5. **Interpretabilidad**: para reseñas mal clasificadas, ¿qué atendió el modelo? ¿Explica el error?
+
+6. **Escala**: entrenar con secuencias de largo 100, 500 y 1000. Comparar tiempo de época: Atención vs. LSTM.
+
+# Vista Previa: Clase 5
+
+## De Bloques a Modelos Pre-entrenados
+
+La atención es poderosa, pero entrenar desde cero es costoso:
+
+\begin{center}
+\includegraphics[width=0.60\textwidth]{d10_bert_cost-1.png}
+\end{center}
+
+\vspace{0.3cm}
+
+**Clase 5: Transformers y Modelos Pre-entrenados**
+
+- Arquitectura completa del Transformer (codificador + decodificador)
+- Modelos pre-entrenados: BERT, GPT y variantes
+- Aprendizaje por transferencia (*fine-tuning*)
+- Uso práctico con HuggingFace 
+
+\vspace{0.2cm}
+\footnotesize *Devlin et al. (2019), "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding", NAACL — \texttt{arxiv.org/abs/1810.04805}*
+
+# Referencias
+
+## Para Profundizar
+
+- **Vaswani et al. (2017).** "Attention Is All You Need." *NeurIPS*. \texttt{arxiv.org/abs/1706.03762} — El artículo fundacional de los Transformers; lectura obligatoria.
+
+- **Bahdanau, Cho \& Bengio (2015).** "Neural Machine Translation by Jointly Learning to Align and Translate." *ICLR*. \texttt{arxiv.org/abs/1409.0473} — Origen del mecanismo de atención para secuencias.
+
+- **Alammar, J. (2018).** "The Illustrated Transformer." \texttt{jalammar.github.io/illustrated-transformer} — La explicación visual más recomendada; sin necesidad de código previo.
+
+- **Goodfellow, Bengio \& Courville (2016).** *Deep Learning*, Cap. 12. MIT Press. \texttt{deeplearningbook.org} — Marco teórico de modelos de secuencias.
+
+- **Clark et al. (2019).** "What Does BERT Look at?" *ACL Workshop*. \texttt{arxiv.org/abs/1906.04341} — Análisis empírico de qué aprenden las cabezas de atención.
+
+- **He et al. (2016).** "Deep Residual Learning for Image Recognition." *CVPR*. \texttt{arxiv.org/abs/1512.03385} — Origen de las conexiones residuales usadas en el bloque Transformer.
+
+# Preguntas y Discusión
+
+¡Gracias!
+
+**Conclusión clave**: Los mecanismos de atención permiten que cada palabra "vea" a todas las demás de forma instantánea y paralela. Esta combinación de expresividad y eficiencia computacional es la razón por la que los Transformers dominan el NLP moderno.
 
 \vspace{0.5cm}
 
-Next: Complete transformer models and pre-training
-
+Siguiente: Arquitectura completa del Transformer y modelos pre-entrenados (BERT, GPT)
