@@ -24,10 +24,10 @@ graphics: true
 Las RNN procesan una palabra a la vez, creando un cuello de botella:
 
 \begin{center}
-\includegraphics[width=0.95\textwidth]{d1_rnn_bottleneck-1.png}
+\includegraphics[width=1.05\textwidth]{d1_rnn_bottleneck-1.png}
 \end{center}
 
-\vspace{0.3cm}
+---
 
 **Problemas**:
 
@@ -39,8 +39,9 @@ Las RNN procesan una palabra a la vez, creando un cuello de botella:
 
 **¿Qué pasaría si cada palabra pudiera "mirar" a todas las demás al mismo tiempo?**
 
-\vspace{0.2cm}
-\footnotesize *Vaswani et al. (2017), "Attention Is All You Need", NeurIPS. El artículo que introdujo los Transformers — disponible en \texttt{arxiv.org/abs/1706.03762}*
+\vspace{0.5cm}
+
+\footnotesize Vaswani et al. (2017), "Attention Is All You Need", NeurIPS. El artículo que introdujo los Transformers — disponible en \texttt{arxiv.org/abs/1706.03762}
 
 # La Idea de la Atención
 
@@ -52,9 +53,9 @@ En lugar de leer de izquierda a derecha, la **atención** permite enfocarse en l
 \includegraphics[width=0.72\textwidth]{d2_soft_selection-1.png}
 \end{center}
 
-\vspace{0.3cm}
+---
 
-**La atención como un foco de luz**:
+**Enfoque selectivo del mecanismo de Atención**:
 
 | Componente | Pregunta que responde |
 |---|---|
@@ -64,11 +65,11 @@ En lugar de leer de izquierda a derecha, la **atención** permite enfocarse en l
 | **Salida** | Promedio ponderado de las palabras relevantes |
 
 \vspace{0.2cm}
-\footnotesize *Bahdanau, Cho \& Bengio (2015), "Neural Machine Translation by Jointly Learning to Align and Translate", ICLR. El artículo original de atención — \texttt{arxiv.org/abs/1409.0473}*
+\footnotesize Bahdanau, Cho \& Bengio (2015), "Neural Machine Translation by Jointly Learning to Align and Translate", ICLR. El artículo original de atención — \texttt{arxiv.org/abs/1409.0473}
 
-# Auto-Atención: Consulta, Clave, Valor
+# *Self-Attention*: Consulta, Clave, Valor
 
-## La Matemática (Intuitiva)
+## Notación y su significado
 
 $$\text{Atención}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
 
@@ -83,17 +84,16 @@ $$\text{Atención}(Q, K, V) = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\righ
 5. **Valores** $V$: combinación ponderada de los vectores de palabras
 
 \vspace{0.2cm}
-\footnotesize *Vaswani et al. (2017), sección 3.2. Para una derivación paso a paso: Alammar (2018), "The Illustrated Transformer" — \texttt{jalammar.github.io/illustrated-transformer}*
+\footnotesize Vaswani et al. (2017), sección 3.2. Para una derivación paso a paso: Alammar (2018), "The Illustrated Transformer" — \url{https://jalammar.github.io/illustrated-transformer/}
 
 # Ejemplo Numérico de Atención
 
-## ¿Qué atiende la palabra "fue"?
+## Ejemplo de Atención sobre "fue"
 
 \begin{center}
-\includegraphics[width=0.88\textwidth]{d3_qkv_example-1.png}
+\includegraphics[width=0.58\textwidth]{d3_qkv_example-1.png}
 \end{center}
 
-\vspace{0.2cm}
 
 La representación final de "fue" incorpora información de toda la oración, especialmente de "genial" — capturando la relación semántica entre verbo y adjetivo.
 
@@ -106,10 +106,10 @@ Una sola cabeza de atención no captura todas las relaciones posibles.
 **Solución**: usar varias cabezas (*heads*), cada una aprendiendo patrones distintos:
 
 \begin{center}
-\includegraphics[width=0.80\textwidth]{d4_multihead-1.png}
+\includegraphics[width=0.70\textwidth]{d4_multihead-1.png}
 \end{center}
 
-\vspace{0.3cm}
+---
 
 Las salidas de todas las cabezas se **concatenan** y se proyectan linealmente:
 
@@ -122,14 +122,14 @@ $$\text{MultiHead}(Q,K,V) = \text{Concat}(\text{cabeza}_1, \ldots, \text{cabeza}
 - Robustez: si una cabeza falla, las demás compensan
 
 \vspace{0.2cm}
-\footnotesize *Vaswani et al. (2017), sección 3.3. En el paper original se usan $h=8$ cabezas con $d_k = d_v = 64$.*
+\footnotesize Vaswani et al. (2017), sección 3.3. En el paper original se usan $h=8$ cabezas con $d_k = d_v = 64$.
 
 # Paralelización: La Ventaja Clave
 
 ## RNN vs. Atención
 
 \begin{center}
-\includegraphics[width=0.95\textwidth]{d5_parallel-1.png}
+\includegraphics[width=0.75\textwidth]{d5_parallel-1.png}
 \end{center}
 
 | Métrica | RNN/LSTM | Atención |
@@ -150,12 +150,12 @@ La atención trata todas las palabras por igual: no tiene noción de posición.
 
 \vspace{0.3cm}
 
-**Solución**: sumar una **codificación posicional** al embedding de cada palabra:
+**Solución**: sumar una **codificación posicional** (Positional Encoding) al embedding de cada palabra:
 
 $$PE(\text{pos},\, 2i)   = \sin\!\left(\frac{\text{pos}}{10000^{2i/d}}\right)$$
 $$PE(\text{pos},\, 2i+1) = \cos\!\left(\frac{\text{pos}}{10000^{2i/d}}\right)$$
 
-\vspace{0.2cm}
+---
 
 Cada posición recibe un patrón sinusoidal único que varía a distintas frecuencias:
 
@@ -163,8 +163,7 @@ Cada posición recibe un patrón sinusoidal único que varía a distintas frecue
 \includegraphics[width=0.82\textwidth]{d9_positional_table-1.png}
 \end{center}
 
-\vspace{0.2cm}
-\footnotesize *El uso de sinusoides permite al modelo generalizar a secuencias más largas que las vistas en entrenamiento. Ver Vaswani et al. (2017), sección 3.5.*
+\footnotesize El uso de sinusoides permite al modelo generalizar a secuencias más largas que las vistas en entrenamiento. Ver Vaswani et al. (2017), sección 3.5.
 
 # El Bloque Transformer
 
@@ -174,14 +173,20 @@ Cada posición recibe un patrón sinusoidal único que varía a distintas frecue
 \includegraphics[width=0.62\textwidth]{d6_transformer_block-1.png}
 \end{center}
 
+---
+
 **Conexión residual y normalización** (*Add & Norm*):
 
 $$\text{Salida} = \text{LayerNorm}\!\left(x + \text{Atención}(x)\right)$$
 
-**¿Por qué residual?** Los gradientes fluyen por la suma (no por composición), lo que facilita el entrenamiento profundo. La red aprende *refinamientos* sobre la entrada, no transformaciones absolutas.
+
+**¿Por qué residual?** *Add* toma la entrada original de una capa y la suma directamente a la salida procesada de esa misma capa. Ayuda a preservar la información original y evita que se pierda a medida que el modelo se vuelve más profundo.
+
+Luego se aplica una técnica de normalización al resultado combinado. Esto estabiliza el flujo de gradientes, evitando que sean demasiado grandes o pequeños.
+
 
 \vspace{0.2cm}
-\footnotesize *He et al. (2016), "Deep Residual Learning for Image Recognition" — origen de las conexiones residuales, aplicadas luego a transformers.*
+\footnotesize He et al. (2016), "Deep Residual Learning for Image Recognition" — origen de las conexiones residuales, aplicadas luego a transformers.
 
 # API de Atención en Keras
 
@@ -195,11 +200,10 @@ capa_atencion = keras.layers.MultiHeadAttention(
     key_dim=64         # dimension por cabeza (total = key_dim x num_heads)
 )
 
-# Auto-atencion: la secuencia atiende a si misma
+# Auto-atencion sobre si misma
 salida = capa_atencion(query=x, value=x, key=x)
 ```
 
-\vspace{0.3cm}
 
 **Parámetros clave**:
 
@@ -209,52 +213,29 @@ salida = capa_atencion(query=x, value=x, key=x)
 | `key_dim` | Dimensión por cabeza | 32–128 |
 | `dropout` | Regularización en los pesos | 0.1–0.3 |
 
-\vspace{0.2cm}
-
 El código completo del modelo, codificación posicional, entrenamiento y visualización está en **`clase_4_codigo_completo.py`**.
+
 
 # Ejemplo Práctico: Clasificación de Sentimientos
 
 ## Tarea y Arquitectura
 
-**Objetivo**: clasificar reseñas de IMDb como positivas/negativas usando atención
-
-**Arquitectura del clasificador**:
+**Actividad**: clasificar reseñas de IMDb como positivas/negativas usando atención con la siguiente arquitectura.
 
 \begin{center}
-\includegraphics[width=0.65\textwidth]{d7_classifier-1.png}
+\includegraphics[width=0.45\textwidth]{d7_classifier-1.png}
 \end{center}
 
-\vspace{0.3cm}
 
-**Resultado esperado**: ~91–93% de precisión, entrenamiento **más rápido que LSTM** gracias a la paralelización.
+# Rendimiento y Velocidad
 
-\vspace{0.2cm}
-
-Ver implementación completa en **`clase_4_codigo_completo.py`**, Sección 3.
-
-# Comparación de Enfoques
-
-## Rendimiento y Velocidad
-
-| Modelo | Precisión | Tiempo/época | Paralelizable |
-|---|---|---|---|
-| Embeddings promediados | 0.88 | 2 seg | Ok |
-| LSTM | 0.92 | 45 seg | X (secuencial) |
-| CNN | 0.91 | 8 seg | Ok |
-| **Atención** | **0.92** | **10 seg** | **Ok (totalmente)** |
-
-\vspace{0.3cm}
-
-**Ventajas de la atención**:
+## Ventajas de la atención
 
 - Precisión comparable a LSTM
 - Mucho más rápido (paralelizable)
 - Mejor escalabilidad a secuencias largas
 - **Interpretable**: los pesos de atención muestran en qué se enfocó el modelo
 
-\vspace{0.2cm}
-\footnotesize *Tiempos medidos en GPU NVIDIA T4. En CPU la ganancia relativa es similar pero los tiempos absolutos son mayores.*
 
 # Visualización de los Pesos de Atención
 
@@ -265,41 +246,19 @@ Los pesos de atención permiten **interpretar** las decisiones del modelo:
 \vspace{0.2cm}
 
 \begin{center}
-\includegraphics[width=0.78\textwidth]{d8_attention_heatmap-1.png}
+\includegraphics[width=0.55\textwidth]{d8_attention_heatmap-1.png}
 \end{center}
 
-\vspace{0.3cm}
+## Relevancia de este mecanismo
 
-Esta interpretabilidad es una ventaja concreta sobre LSTM, donde los estados ocultos son difíciles de leer directamente.
+Interpretabilidad es una ventaja concreta sobre LSTM, donde los estados ocultos son difíciles de leer directamente.
 
-\vspace{0.2cm}
+La atención es el **mecanismo central** de BERT, GPT y todos los modelos modernos de NLP. Comprender su funcionamiento es imprescindible para la Clase 5.
 
-El código para extraer y graficar los pesos está en **`clase_4_codigo_completo.py`**, Sección 5.
 
 \vspace{0.2cm}
 \footnotesize *Clark et al. (2019), "What Does BERT Look at?", ACL. Análisis detallado de qué aprenden las cabezas de atención en modelos pre-entrenados.*
 
-# Resumen de Conceptos Clave
-
-## Lo Que Hemos Aprendido
-
-Ok **Cuello de botella RNN**: procesamiento secuencial limita velocidad y memoria
-
-Ok **Selección suave**: la atención pondera todas las palabras en lugar de elegir una
-
-Ok **Marco Consulta-Clave-Valor**: formalización matemática de la atención
-
-Ok **Atención multi-cabezal**: múltiples perspectivas aprendidas en paralelo
-
-Ok **Codificación posicional**: sinusoides que preservan el orden de la secuencia
-
-Ok **Bloque Transformer**: atención + conexión residual + normalización + FFN
-
-Ok **Paralelización**: 10–50× más rápido que RNN en secuencias largas
-
-## Por Qué Importa
-
-La atención es el **mecanismo central** de BERT, GPT y todos los modelos modernos de NLP. Comprender su funcionamiento es imprescindible para la Clase 5.
 
 # Problemas Comunes
 
@@ -313,43 +272,14 @@ La atención es el **mecanismo central** de BERT, GPT y todos los modelos modern
 | Entrenamiento lento | Implementación ineficiente | Usar capas integradas de Keras, no implementación manual |
 | Sobreajuste severo | Pocos datos o modelo muy grande | Agregar `dropout` en atención y capas densas |
 
-# Ejercicios para la Clase 4
 
-## Tareas Prácticas
+# Cierre
 
-1. **Visualizar atención**: obtener pesos de atención para 10 reseñas. ¿Los patrones tienen sentido lingüístico?
+Los mecanismos de atención permiten que cada palabra "vea" a todas las demás de forma instantánea y paralela
 
-2. **Variar `num_heads`**: probar 2, 4, 8 y 16 cabezas. ¿Más siempre es mejor?
+Esta combinación de expresividad y eficiencia computacional es la razón por la que los Transformers dominan las aplicaciones modernas de NLP
 
-3. **Comparar con LSTM**: entrenar LSTM con los mismos hiperparámetros. ¿Cuánto gana la atención en velocidad?
 
-4. **Ablación posicional**: entrenar sin codificación posicional. ¿Cuánto impacta en la precisión?
-
-5. **Interpretabilidad**: para reseñas mal clasificadas, ¿qué atendió el modelo? ¿Explica el error?
-
-6. **Escala**: entrenar con secuencias de largo 100, 500 y 1000. Comparar tiempo de época: Atención vs. LSTM.
-
-# Vista Previa: Clase 5
-
-## De Bloques a Modelos Pre-entrenados
-
-La atención es poderosa, pero entrenar desde cero es costoso:
-
-\begin{center}
-\includegraphics[width=0.60\textwidth]{d10_bert_cost-1.png}
-\end{center}
-
-\vspace{0.3cm}
-
-**Clase 5: Transformers y Modelos Pre-entrenados**
-
-- Arquitectura completa del Transformer (codificador + decodificador)
-- Modelos pre-entrenados: BERT, GPT y variantes
-- Aprendizaje por transferencia (*fine-tuning*)
-- Uso práctico con HuggingFace 
-
-\vspace{0.2cm}
-\footnotesize *Devlin et al. (2019), "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding", NAACL — \texttt{arxiv.org/abs/1810.04805}*
 
 # Referencias
 
@@ -367,12 +297,22 @@ La atención es poderosa, pero entrenar desde cero es costoso:
 
 - **He et al. (2016).** "Deep Residual Learning for Image Recognition." *CVPR*. \texttt{arxiv.org/abs/1512.03385} — Origen de las conexiones residuales usadas en el bloque Transformer.
 
-# Preguntas y Discusión
 
-¡Gracias!
 
-**Conclusión clave**: Los mecanismos de atención permiten que cada palabra "vea" a todas las demás de forma instantánea y paralela. Esta combinación de expresividad y eficiencia computacional es la razón por la que los Transformers dominan el NLP moderno.
 
-\vspace{0.5cm}
 
-Siguiente: Arquitectura completa del Transformer y modelos pre-entrenados (BERT, GPT)
+# Ejercicios para la Clase 4
+
+## Tareas Prácticas
+
+1. **Visualizar atención**: obtener pesos de atención para 10 reseñas. ¿Los patrones tienen sentido lingüístico?
+
+2. **Variar `num_heads`**: probar 2, 4, 8 y 16 cabezas. ¿Más siempre es mejor?
+
+3. **Comparar con LSTM**: entrenar LSTM con los mismos hiperparámetros. ¿Cuánto gana la atención en velocidad?
+
+4. **Ablación posicional**: entrenar sin codificación posicional. ¿Cuánto impacta en la precisión?
+
+5. **Interpretabilidad**: para reseñas mal clasificadas, ¿qué atendió el modelo? ¿Explica el error?
+
+6. **Escala**: entrenar con secuencias de largo 100, 500 y 1000. Comparar tiempo de época: Atención vs. LSTM.
