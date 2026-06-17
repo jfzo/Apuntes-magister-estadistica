@@ -213,7 +213,6 @@ salida = capa_atencion(query=x, value=x, key=x)
 | `key_dim` | Dimensión por cabeza | 32–128 |
 | `dropout` | Regularización en los pesos | 0.1–0.3 |
 
-El código completo del modelo, codificación posicional, entrenamiento y visualización está en **`clase_4_codigo_completo.py`**.
 
 
 # Ejemplo Práctico: Clasificación de Sentimientos
