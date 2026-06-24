@@ -75,7 +75,7 @@ Cada módulo apila $N$ bloques idénticos. El artículo original usa $N = 6$.
 
 # El Bloque Transformer
 
-## Estructura Interna
+## Estructura Interna (Transformer)
 
 \begin{center}
 \includegraphics[width=0.60\textwidth]{d2_transformer_block.png}
