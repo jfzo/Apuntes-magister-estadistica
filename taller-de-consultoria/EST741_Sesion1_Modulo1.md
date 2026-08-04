@@ -41,11 +41,6 @@ Abrir con la analogía médica y dejar que resuene unos segundos antes de avanza
 :::
  
 
-## Organización de las sesiones
-
-Qué ocurre en cada sesión y entre sesiones.
-
----
  
 ## Cuatro decisiones antes de tocar un modelo
  
@@ -53,6 +48,7 @@ Qué ocurre en cada sesión y entre sesiones.
 2. **Variable objetivo** — ¿qué exactamente se predice?
 3. **Unidad de análisis** — ¿sobre qué se hace cada predicción?
 4. **Métrica de éxito** — ¿cómo sabremos si el modelo sirve?
+
 > Marco basado en Provost & Fawcett (2013), *Data Science for Business*, O'Reilly — referencia estándar de la industria para este paso.
  
 ::: notes
@@ -67,6 +63,7 @@ Estas cuatro decisiones son el hilo conductor del resto del bloque; cada una se 
 - **Regresión**: ¿cuánto va a valer una cantidad continua?
 - **Forecasting (series temporales)**: ¿cuánto va a valer algo *en el futuro*, dado su historial?
 - **Datos no estructurados**: texto o imágenes como insumo de cualquiera de las anteriores
+
 *El prompt del cliente rara vez lo dice explícitamente — hay que inferirlo de la pregunta de negocio.*
  
 ::: notes
@@ -81,6 +78,7 @@ Pedir a un par de estudiantes que traten de ubicar su propio prompt en una de es
   - Cuidado con variables "proxy" que filtran información del futuro (*data leakage*)
 - **Unidad de análisis**: la fila sobre la que se predice
   - ¿Por cliente? ¿por día? ¿por tienda-día? ¿por producto-semana?
+
 *Un error frecuente: definir la variable objetivo antes de definir la unidad de análisis, en vez de al revés.*
  
 ::: notes
@@ -125,6 +123,7 @@ Conectar explícitamente con el entregable de la Semana 2: lo que se declara aqu
 - [ ] Unidad de análisis explícita
 - [ ] Métrica de éxito ligada a una decisión de negocio
 - [ ] Protocolo de validación temporal elegido
+
 *Estas cinco líneas son el esqueleto del Statement of Work de 2 páginas.*
  
 ::: notes
@@ -133,7 +132,7 @@ Dejar esta diapositiva proyectada mientras se hace la transición al Momento 2; 
  
 ---
  
-# Momento 2: Ejemplo resuelto en vivo
+# Caso de ejemplo
  
 ::: notes
 Duración: 10 minutos, en plenario. El objetivo es modelar el razonamiento del Momento 1 con un caso ajeno, para no condicionar la respuesta de ningún equipo sobre su propio prompt.
@@ -141,11 +140,10 @@ Duración: 10 minutos, en plenario. El objetivo es modelar el razonamiento del M
  
 ---
  
-## Caso ilustrativo (no es el prompt del Cliente 1)
+## Caso ilustrativo 
  
 **Contexto:** una cadena de comercio minorista quiere anticipar cuánto va a vender cada tienda la próxima semana, para ajustar su dotación de personal.
  
-*Se usa un caso distinto al de cada equipo para modelar el razonamiento sin condicionar la respuesta de nadie sobre su propio caso.*
  
 ::: notes
 Aclarar en voz alta que este caso es deliberadamente distinto al del Cliente 1, para que nadie intente copiar la solución literal en vez de el razonamiento.
@@ -174,6 +172,7 @@ Recorrer la tabla fila por fila, señalando en cada una a qué pregunta del Mome
 - Partición: últimas 8 semanas como test, resto como entrenamiento
 - Línea base ingenua: "esta semana = misma semana el año anterior"
 - Cualquier modelo candidato debe **superar** esa línea base para justificarse
+
 ::: notes
 Enfatizar la línea base ingenua como criterio de justificación: un modelo complejo que no supera esto no se justifica, sin importar cuán sofisticado sea.
 :::
@@ -185,23 +184,26 @@ Enfatizar la línea base ingenua como criterio de justificación: un modelo comp
 > **Pregunta de negocio:** ¿Cuánta dotación de personal necesita cada tienda la próxima semana?
 >
 > **Tarea:** forecasting semanal por tienda
+>
 > **Métrica de éxito:** MAE en \$, mejora ≥ 15% sobre la línea base ingenua
+>
 > **Validación:** partición temporal, últimas 8 semanas como test
  
-*Esto es exactamente el formato que cada equipo debe producir para su propio prompt.*
  
 ::: notes
+Esto es exactamente el formato que cada equipo debe producir para su propio prompt.
+
 Señalar que este bloque de cuatro líneas es literalmente la plantilla que van a llenar con su propio caso en la sala. No hay nada oculto o adicional que se espere del Statement of Work más allá de esto, bien argumentado.
 :::
  
 ---
  
-## Transición al trabajo en salas
+## Trabajo en salas
  
-- Cada equipo aplica este mismo marco a los datos y el prompt del Cliente 1
+- Cada equipo aplica este mismo marco a los datos y el prompt del Cliente
 - Producto esperado al cierre de la sesión: borrador de las cuatro decisiones
-- Producto evaluado en la Sesión B de esta semana: Statement of Work de 2 páginas
-**A trabajar.**
+- Hito: Statement of Work de 2 páginas
+
  
 ::: notes
 Antes de enviar a salas, recordar la regla del issue con etiqueta blocker: cualquier duda que surja en la sala y no se resuelva entre el equipo debe quedar registrada ahí para la visita del profesor.
