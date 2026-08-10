@@ -18,18 +18,7 @@ toc-depth: 1
 toc-title: Estructura de la Presentación
 ---
 
-## Cómo funciona esta sesión
 
-La prelectura ya cubrió el detalle. Aquí revisamos lo esencial y resolvemos dudas.
-
-Seis bloques, cada uno con:
-
-- Dos láminas de conceptos
-- Una lámina de actividades para trabajar en clase
-
-Ten RStudio abierto. Todo lo que aparece se ejecuta.
-
-\note{Encuadre inicial de cinco minutos. Conviene preguntar de entrada quiénes alcanzaron a hacer la prelectura completa y quiénes no, porque eso determina cuánto detenerse en cada bloque. Si más de la mitad no la hizo, conviene ampliar las secciones 1 y 2 y dejar 5 y 6 como trabajo posterior.}
 
 # 1. Nociones centrales
 
@@ -55,7 +44,7 @@ Tres tipos de datos (*data types*) básicos:
 
 ## Funciones y argumentos
 
-Los argumentos (*arguments*) se pasan por posición o por nombre. Muchos tienen valor predeterminado (*default*).
+Los argumentos se pasan por posición o por nombre. Muchos tienen valor predeterminado.
 
 ```r
 round(3.14159, digits = 2)
@@ -92,7 +81,7 @@ Ayuda con `?round`. La sección *Arguments* es la que más se consulta.
 
 ## Creación, coerción e indexación
 
-Un vector es una secuencia de elementos del mismo tipo. Si se mezclan, R convierte todo al más general sin avisar: es la coerción (*coercion*).
+Un vector es una secuencia de elementos del mismo tipo. Si se mezclan, R convierte todo al más general sin avisar: es la coerción.
 
 ```r
 frec <- c(el = 4521, de = 3890, que = 2103, y = 1987)
@@ -101,7 +90,7 @@ frec["que"]    # por nombre
 frec[-1]       # por exclusión
 ```
 
-La indexación lógica (*logical indexing*) es la forma central:
+La indexación lógica es la forma central:
 
 ```r
 frec[frec > 2000]
@@ -113,7 +102,7 @@ frec[frec > 2000]
 
 ## Vectorización y ordenamiento
 
-Las operaciones son vectorizadas (*vectorized*): se aplican elemento a elemento sin bucles.
+Las operaciones son vectorizadas: se aplican elemento a elemento sin bucles.
 
 ```r
 (frec_abs / 85000) * 1000      # normaliza todo de una vez
@@ -127,7 +116,7 @@ Dos funciones que se confunden:
 - `sort()` devuelve el vector ordenado
 - `order()` devuelve los índices que producirían ese orden
 
-\note{El error más común del curso completo es comparar con = en lugar de ==. Vale la pena escribirlo en el pizarrón. Sobre sort y order: order parece inútil ahora, pero es imprescindible para ordenar marcos de datos en la sección 4; conviene anticiparlo para que no parezca gratuito.}
+\note{El error más común del curso completo es comparar con = en lugar de ==. Vale la pena escribirlo en el pizarrón. Sobre sort y order: order parece inútil ahora, pero es imprescindible para ordenar tablas de datos en la sección 4; conviene anticiparlo para que no parezca gratuito.}
 
 ## Actividades 2
 
@@ -174,7 +163,7 @@ mean(acept)
 
 Que la mediana funcione y la media no es la teoría de escalas de medición, verificada por el lenguaje.
 
-**Trampa clásica:** `as.numeric()` sobre un factor devuelve códigos internos.
+**Ojo:** `as.numeric()` sobre un factor devuelve códigos internos.
 Usar siempre `as.numeric(as.character(x))`.
 
 \note{Esta es la lámina que más rinde de toda la sesión. Conecta directamente con los fundamentos de muestreo: nominal, ordinal, intervalo, razón. Aquí el error lo produce R y no el profesor, lo que hace la lección memorable. Dedicarle tiempo aunque haya que recortar en otro lado.}
@@ -189,19 +178,19 @@ Usar siempre `as.numeric(as.character(x))`.
 
 \note{Doce minutos. La 3.3 debe hacerse en ese orden: primero el error, después la corrección. Si se les da la solución correcta de entrada, no retienen la trampa. El resultado incorrecto es 11; el correcto, 29. Advertir que median() sobre factor ordinal requiere R 4.0 o superior.}
 
-# 4. Marcos de datos
+# 4. Tablas de datos
 
 ## Estructura e inspección
 
-Un marco de datos (*data frame*) es una tabla: columnas de igual longitud, cada una de un tipo posiblemente distinto.
+Un *data frame* es una tabla: columnas de igual longitud, cada una de un tipo posiblemente distinto.
 
 ```r
 meta <- data.frame(
-  texto  = c("T01", "T02", "T03"),
-  genero = c("narrativo", "académico", "narrativo"),
-  tokens = c(1250, 3400, 890)
+  texto = c("T01", "T02", "T03", "T04", "T05"),
+  genero = c("narrativo", "académico", "narrativo", "periodístico", "académico"),
+  tokens = c(1250, 3400, 890, 2100, 4200),
+  types = c(520, 980, 410, 760, 1150)
 )
-str(meta)
 ```
 
 Al abrir cualquier conjunto de datos, ejecutar siempre `str()`. Complementan `dim()`, `head()` y `summary()`.
@@ -228,13 +217,13 @@ Guardar: `write.csv(..., row.names = FALSE, fileEncoding = "UTF-8")`
 
 ## Actividades 4
 
-**4.1** Crea un marco de datos `hablantes` con seis filas y columnas id, edad, sexo, ciudad y sujeto_nulo. Inspecciónalo con `str()`.
+**4.1** Crea un data frame `hablantes` con seis filas y columnas id, edad, sexo, ciudad y sujeto_nulo. Inspecciónalo con `str()`.
 
 **4.2** Filtra los menores de 40 años, primero con indexación lógica y luego con `subset()`.
 
 **4.3** Añade una columna `grupo_etario` que valga "joven" bajo los 40 años y "mayor" en caso contrario, usando `ifelse()`.
 
-**4.4** Calcula la media de sujeto_nulo por ciudad con `aggregate()`. Guarda el marco como CSV, recárgalo y verifica con `str()` que los tipos se conservaron.
+**4.4** Calcula la media de sujeto_nulo por ciudad con `aggregate()`. Guarda el data frame como CSV, recárgalo y verifica con `str()` que los tipos se conservaron.
 
 \note{Quince minutos. La 4.3 usa ifelse() antes de explicarlo formalmente en la sección 6; si alguien pregunta, adelantar que es la versión vectorizada del condicional. La 4.4 es la que produce el descubrimiento sobre factores y codificación: al recargar, las columnas de texto vuelven como character.}
 
@@ -242,7 +231,7 @@ Guardar: `write.csv(..., row.names = FALSE, fileEncoding = "UTF-8")`
 
 ## Contenedores heterogéneos
 
-Una lista aloja objetos de cualquier tipo y longitud, incluidos marcos de datos completos.
+Una lista aloja objetos de cualquier tipo y longitud, incluidos tablas de datos completos.
 
 Distinción central:
 
@@ -312,6 +301,9 @@ Bucle (*loop*) `for`: preasignar el contenedor y recorrer con `seq_along()`.
 Instrumento central de la lingüística de corpus:
 
 ```r
+corpus <- c("El gato duerme", 
+  "La casa grande", 
+  "Los gatos son independientes")
 grepl("gat", corpus)                    # devuelve lógicos
 grep("gat", corpus)                     # devuelve posiciones
 grep("gat", corpus, value = TRUE)       # devuelve los elementos
@@ -342,7 +334,7 @@ Tres hábitos: comentar el porqué y no el qué, usar nombres descriptivos, fija
 - Crear objetos, consultar su tipo y escribir funciones propias
 - Indexar vectores por posición, nombre y condición lógica
 - Reordenar niveles de un factor y declararlo ordinal
-- Filtrar marcos de datos y agregar por grupos
+- Filtrar tablas de datos y agregar por grupos
 - Extraer componentes de una lista de resultados
 - Buscar patrones en texto con `grep()`
 
@@ -350,12 +342,11 @@ Si algo quedó en duda, es el momento de decirlo.
 
 \note{Cierre de cinco minutos. Preguntar explícitamente por los tres puntos que suelen quedar flojos: la diferencia entre corchete simple y doble, la conversión de factores a numérico, y cuándo usar bucle. Si el grupo se ve seguro, se puede saltar directo a la siguiente lámina.}
 
-## Lo que viene
+## *Upcoming* ... siguiente sesión
 
 La próxima sesión abre con datos reales, no con sintaxis.
 
 Todo lo de hoy será herramienta, no contenido.
 
-Trae tu script de soluciones y las dudas anotadas.
 
 \note{Cerrar señalando la continuidad: la prelectura y esta sesión son andamiaje. A partir de aquí R desaparece como tema y aparece como instrumento. Recordar el material de referencia: Wickham y Grolemund disponible libremente en r4ds.hadley.nz, y las hojas de referencia de RStudio.}
