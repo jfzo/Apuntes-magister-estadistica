@@ -118,19 +118,19 @@ Conectar explícitamente con el entregable de la Semana 2: lo que se declara aqu
  
 ## Checklist de cierre del Momento 1
  
+- [ ] Identificación del problema en un dominio escogido
 - [ ] Tipo de tarea predictiva identificado
 - [ ] Variable objetivo definida sin fuga de información
 - [ ] Unidad de análisis explícita
 - [ ] Métrica de éxito ligada a una decisión de negocio
-- [ ] Protocolo de validación temporal elegido
+- [ ] Protocolo de validación elegido
 
-*Estas cinco líneas son el esqueleto del Statement of Work de 2 páginas.*
+*Estos ítems corresponden al esqueleto del Statement of Work de 2 páginas (máx.)*
  
 ::: notes
 Dejar esta diapositiva proyectada mientras se hace la transición al Momento 2; sirve como referencia visual constante durante el ejemplo resuelto.
 :::
  
----
  
 # Caso de ejemplo
  

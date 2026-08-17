@@ -27,71 +27,18 @@ Antes de aprender *cómo* explorar datos, conviene entender *por qué* debemos h
 
 La respuesta es incómoda:
 
-- **La cognición humana es sistemáticamente poco fiable**
-- Vemos patrones donde no los hay
+**Confiabilidad en la cognición humana**
+
 - Buscamos confirmar lo que ya creemos
 - Razonamos mal con probabilidades
+- Vemos patrones donde no los hay
 
-El método científico no es una formalidad: es un conjunto de **salvaguardas contra nuestros propios errores**.
 
-\note{La idea central del módulo introductorio. No se trata de desconfiar de los estudiantes, sino de reconocer que todos —expertos incluidos— compartimos un aparato cognitivo con sesgos predecibles. El EDA será, más adelante, la aplicación práctica de estas salvaguardas. Conviene enfatizar el hilo conductor: distinguir entre lo que *parece* verdadero y lo que *es* contrastable.}
-
-## Hoja de ruta
-
-Tres bloques:
-
-1. **¿Por qué necesitamos ciencia?** — límites de la lógica pura y la intuición
-2. **Errare humanum est** — sesgos cognitivos y falacias
-3. **¿Qué es la ciencia?** — falsación y método científico en lingüística
-
-\note{Estructura tomada del capítulo 1 de SLAT7855 (Schweinberger). Cada bloque construye sobre el anterior: primero establecemos que necesitamos evidencia empírica, luego por qué la intuición no basta, y finalmente qué procedimiento nos protege.}
-
-# 1. ¿Por qué necesitamos ciencia?
-
-## Una definición mínima
-
-> La ciencia es un proceso metódico para adquirir conocimiento sobre el mundo basado en **evidencia empírica**.
-
-La palabra clave es *empírica*.
-
-Para entender su peso, contrastemos dos familias de disciplinas.
-
-\note{Definición deliberadamente simple para arrancar. El énfasis en "empírica" prepara el contraste con las ciencias formales, que es el argumento de la próxima slide.}
-
-## Ciencias formales vs. empíricas
-
-| | **Formales** | **Empíricas** |
-|---|---|---|
-| Ejemplos | Lógica, matemáticas | Sociolingüística, biología |
-| Punto de partida | Axiomas | Observaciones |
-| Método | Inferencia lógica | Observación / experimentación |
-| Conocimiento | Demostrable | Provisional, revisable |
-
-Las formales son poderosas para la **coherencia lógica**:
-
-- *Sócrates es humano* + *todos los humanos son mortales* $\Rightarrow$ *Sócrates es mortal*
-
-\note{La lingüística formal pertenece a la columna izquierda; la lingüística empírica (de corpus, experimental) a la derecha. Este módulo se sitúa firmemente en la segunda. El silogismo ilustra el poder de la inferencia formal: dado que las premisas son verdaderas, la conclusión se sigue con necesidad.}
-
-## El límite de la lógica pura
-
-La lógica construye representaciones **coherentes**, pero no puede decidir **cuál** corresponde a la realidad.
-
-> ¿Levantaré el brazo izquierdo o el derecho al contar hasta tres?
-
-- Ambos mundos son igualmente coherentes
-- Solo la observación resuelve cuál ocurre
-- Hay infinitos mundos lógicamente posibles
-
-**La coherencia interna no garantiza adecuación al mundo.**
-
-\note{Ejemplo de Schweinberger. El punto para lingüistas: un modelo gramatical elegante y formalmente impecable puede ser internamente coherente y aun así describir mal una lengua real. Por eso existe la lingüística empírica. Aquí conviene invitar a la reflexión: ¿cuántas teorías lingüísticas "bonitas" han caído ante datos de corpus?}
-
-# 2. Errare Humanum Est
+# Errar es Humano
 
 ## El concepto ancla: sesgo de confirmación
 
-**Sesgo de confirmación:** tendencia a buscar, notar y recordar información que confirma lo que ya creemos —e ignorar la que la contradice.
+**Sesgo de confirmación:** tendencia a buscar, notar y recordar información que confirma lo que ya creemos e ignorar la que la contradice.
 
 - Uno de los sesgos mejor documentados
 - Afecta a expertos tanto como a legos
