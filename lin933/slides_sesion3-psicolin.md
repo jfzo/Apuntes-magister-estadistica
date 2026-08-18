@@ -48,7 +48,7 @@ Datos: <https://osf.io/3527a>
 
 | Variable | Contenido |
 |---|---|
-| `ia`, `ianum` | La palabra y su posición en el texto |
+| `word`, `ianum` | La palabra y su posición en el texto |
 | `subid`, `lang` | Participante y lengua |
 | `skip`, `firstrun.skip` | Omisión total y de primera pasada |
 | `nfix`, `refix` | Número de fijaciones, refijación |
@@ -110,7 +110,7 @@ mean(fijadas$dur)                   # explícito
 
 **1.1** Construye la tabla de participantes por lengua y ordénala. ¿Cuál tiene más y cuál menos? ¿Qué problema plantea esa desigualdad para comparar lenguas?
 
-**1.2** Verifica la relación de orden entre las tres duraciones sobre palabras fijadas. Si alguna observación la incumple, examínala.
+**1.2** Verifica la relación de orden entre las tres duraciones (` firstfix.dur`, `firstrun.dur` y `dur`) sobre palabras fijadas (`skip==0`). Si alguna observación la incumple, examínala.
 
 
 \note{Ocho minutos. La 1.1 corresponde a la actividad 2.2 del apunte y la 1.2 a la 2.3. En la 1.2, lo interesante no es que la desigualdad se cumpla sino qué hacer si no: una violación indica que se confundió una columna o que el archivo no es el previsto. Es una comprobación que conviene incorporar como rutina.}
@@ -151,7 +151,7 @@ barplot(sort(omision), las = 2, cex.names = 0.8,
 
 ## Actividades del bloque 2
 
-**2.1** Calcula la tasa global de omisión y la de regresiones entrantes. Contrasta la segunda con el rango del cinco al veinte por ciento de la literatura.
+**2.1** Calcula la tasa global de omisión y la de regresiones entrantes (`reg.in`). Contrasta la segunda con el rango del cinco al veinte por ciento de la literatura.
 
 **2.2** Compara la tasa de omisión total (`skip`) con la de primera pasada (`firstrun.skip`). ¿Cuál es mayor y por qué tiene que ser así necesariamente?
 
@@ -163,13 +163,13 @@ barplot(sort(omision), las = 2, cex.names = 0.8,
 ## Construir un predictor
 
 ```r
-meco$long_palabra <- nchar(meco$ia)
+meco$long_palabra <- nchar(meco$word)
 summary(meco$long_palabra)
 
 tapply(meco$long_palabra, meco$lang, mean)
 ```
 
-La columna `ia` contiene la palabra como texto
+La columna `word` contiene la palabra como texto
 
 Usndo `nchar()` obtiene de ella una variable numérica.
 
@@ -320,7 +320,7 @@ Que ambos difieran es en sí mismo un dato sobre la forma de la relación.
 ## Actividades del bloque 5
 
 
-**5.1** Construye el diagrama de cajas de la duración media por lengua a nivel de participante. ¿Qué lenguas muestran los tiempos más largos y cuáles la mayor dispersión entre lectores?
+**5.1** Construye el diagrama de cajas de la duración media por lengua, a nivel de participante. ¿Qué lenguas muestran los tiempos más largos y cuáles la mayor dispersión entre lectores?
 
 **5.2** Elige dos lenguas del corpus ojalá con sistemas de escritura distintos, y repite los análisis.
 
@@ -348,7 +348,6 @@ mi_sub <- subset(meco, lang %in% mis_lenguas)
 
 - Siegelman, N., Schroeder, S., Acartürk, C. et al. (2022). Expanding horizons of cross-linguistic research on reading: The Multilingual Eye-movement Corpus (MECO). *Behavior Research Methods*, 54, 2843-2863.
 - Siegelman, N. et al. (2025). Wave 2 of the Multilingual Eye-Movement Corpus (MECO): New text reading data across languages. *Scientific Data*.
-- Schroeder, S. *popEye: An R package to analyze eye-tracking data from reading experiments*. github.com/sascha2schroeder/popEye
 - Datos: <https://osf.io/3527a>
 
 \note{La documentación de popEye es la referencia para el significado exacto de cada medida oculomotora, y conviene señalarla para quien vaya a trabajar con estos datos más allá de la sesión.}
