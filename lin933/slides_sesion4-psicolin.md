@@ -366,12 +366,15 @@ Probabilidad de observar un resultado tan extremo, o más extremo, que el obteni
  
 ---
 
+\small
+
 | Afirmación incorrecta | Por qué |
 |---|---|
 | Es la probabilidad de que H0 sea verdadera | Se calcula asumiendo que H0 es verdadera |
 | Es la probabilidad de que el resultado se deba al azar | No describe el origen del dato observado |
 | Un valor pequeño indica un efecto grande | Depende también del tamaño de la muestra |
 | Garantiza que un nuevo estudio replicará el resultado | Resume una sola muestra, no predice otras |
+
  
 \note{Esta es la lámina más importante de la sesión y conviene no apresurarla. Leer la definición en voz alta y detenerse en la condición final, "si H0 fuera cierta": es la parte que casi siempre se omite. Recorrer la tabla fila por fila y pedir que alguien intente defender cada afirmación incorrecta antes de refutarla; discutir por qué parece razonable aunque no lo sea es más productivo que solo señalar el error.}
  
