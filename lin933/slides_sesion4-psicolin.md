@@ -269,8 +269,112 @@ cor.test(fijadas$long_palabra, fijadas$dur, method = "spearman")
 
 Con un conjunto de datos de este tamaño, casi cualquier correlación distinta de cero resulta significativa. El valor p informa sobre la existencia de asociación, no sobre su magnitud.
 
-\note{Este último punto es importante y suele pasarse por alto: con cientos de miles de observaciones, un coeficiente de 0.05 puede tener un valor p extremadamente bajo sin que la asociación sea de interés práctico. Distinguir significancia estadística de magnitud del efecto.}
+\note{Este último punto es importante y suele pasarse por alto: con cientos de miles de observaciones, un coeficiente de 0.05 puede tener un valor p extremadamente bajo sin que la asociación sea de interés práctico. Este será el tema exacto de las dos láminas siguientes; no cerrar el punto aquí, solo anunciarlo.}
 
+
+
+## Qué es un test de hipótesis
+
+Un procedimiento para decidir, con una regla fijada de antemano, si los datos observados son incompatibles con una afirmación sobre un parámetro de la población.
+
+Se compone de 5 elementos:
+
+| Elemento | Concepto |
+|---|---|
+| $H_0$ | Afirmación de partida: no hay efecto |
+| $H_1$ | Lo que se sostiene si H0 se rechaza |
+| Estadístico | Un número que resume la discrepancia entre datos y H0 |
+| Valor **p** | Probabilidad de un resultado tan extremo o más, **si $H_0$ fuera cierta** |
+| Decisión | Comparar p con un umbral $\alpha$ fijado antes de ver los datos |
+
+\note{Recorrer la tabla de arriba hacia abajo como una secuencia de pasos, no como definiciones sueltas. Todavía no hay ejemplo ni código: esta lámina fija solo la estructura. Detenerse en la condición de la cuarta fila, "si H0 fuera cierta", que es la parte de la definición que casi siempre se omite y que se retomará en la lámina del valor p.}
+
+## El ejemplo: comparar dos lenguas
+
+¿Difiere la duración media de lectura entre dos lenguas del corpus?
+
+- **$H_0$:** la duración media es igual en ambas lenguas
+- **$H_1$:** las medias difieren
+- **Estadístico:** t, la diferencia de medias en unidades de error estándar
+
+```r
+t.test(dur ~ lang, data = subset(fijadas, lang %in% c("es", "fi")))
+```
+
+El umbral $\alpha$, habitualmente $0.05$, queda fijado **antes** de ejecutar esta línea.
+
+\note{Ejecutar el test en vivo y dejar la salida en pantalla: se leerá componente por componente tres láminas más adelante. Subrayar el punto del umbral: elegir alfa después, a la vista del valor p obtenido, invalida el procedimiento, porque convierte la regla de decisión en una justificación del resultado que se quería obtener.}
+
+## Dos precisiones sobre la decisión
+
+**El test nunca acepta $H_0$.** Puede rechazarla o no rechazarla. _No rechazar_ H0 no prueba que sea verdadera.
+
+**Rechazar $H_0$ no mide el tamaño del efecto.** La decisión es binaria. 
+
+
+\note{Ambas precisiones son consecuencia de la lógica de falsación vista en la primera sesión, y conviene decirlo explícitamente para cerrar el vínculo. La primera es la asimetría popperiana trasladada al test; la segunda anticipa la discusión de significancia frente a magnitud que viene en la sección del valor p. Si el grupo va bien de tiempo, pedir un ejemplo de cada error en un informe hipotético.}
+
+## Del test al valor p
+
+El test reduce todos los datos al estadístico de prueba.
+
+1. Se calcula el estadístico observado. En este caso t.
+2. Bajo $H_0$, ese estadístico tiene una distribución conocida, centrada en cero
+3. El valor p es la proporción de esa distribución tan extrema o más que el t observado
+4. La decisión compara ese valor p con el umbral $\alpha$
+
+\note{Esta lámina es el eje de la relación entre el test y el valor p: el estadístico es un punto, la distribución bajo H0 es el contexto, y el valor p es la posición del punto dentro de ese contexto, expresada como área en las colas. Dibujar en el pizarrón una campana centrada en cero, marcar un t alejado y sombrear el área más extrema: ese sombreado es el valor p.}
+
+## Leer la salida del test
+
+Cada componente de la salida corresponde a un paso del procedimiento:
+
+```r
+res <- t.test(dur ~ lang, data = subset(fijadas, lang %in% c("es", "fi")))
+
+res$statistic   # el t observado: la discrepancia resumida
+res$parameter   # grados de libertad: fijan la forma de la distribucion bajo H0
+res$p.value     # proporcion de esa distribucion mas extrema que el t observado
+```
+
+
+\note{estadístico, distribución y valor p son los pasos 1, 2 y 3 de la lámina anterior.
+
+Volver a la salida que quedó en pantalla desde la segunda lámina y extraer los tres componentes en vivo. Dos relaciones que conviene hacer explícitas aquí. Primera, la relación inversa: cuanto más lejos de cero cae el t observado, menor es el área más extrema y menor el valor p. Segunda, los grados de libertad dependen de n, y con muestras grandes la distribución bajo H0 se concentra, de modo que el mismo tamaño de efecto produce un t mayor y un p menor. Esa es la vía exacta por la que el tamaño muestral empuja el valor p hacia cero.}
+
+## La misma distribución, dos caminos
+
+La permutación de la sección anterior y la fórmula de `t.test()` calculan lo mismo:
+
+- El histograma de `r_perm` **es** la distribución del estadístico bajo $H_0$, construida mezclando los datos
+- La fórmula de `t.test()` aporta esa misma distribución por vía teórica, sin simular
+
+Cuando los supuestos de la fórmula se cumplen, ambos caminos convergen al mismo valor p.
+
+\note{Cierre del bloque: quien entendió el histograma de la permutación ya entendió qué distribución usa la fórmula; solo cambia cómo se obtiene. Si la simulación se ejecutó en vivo en la sección del valor p, proyectar ese histograma junto a esta lámina refuerza la identidad entre ambos objetos. Es también el argumento de por qué la permutación no es un método de juguete: es el mismo concepto, con menos supuestos.}
+
+
+
+
+## Qué es el valor p
+ 
+*Principio fundamental:* Nunca se prueba $H_1$ de forma directa, sino que se evalúa cuán incompatibles son los datos con $H_0$.
+ 
+El valor p cuantifica esa incompatibilidad:
+ 
+Probabilidad de observar un resultado tan extremo, o más extremo, que el obtenido, **si $H_0$ fuera cierta**.
+ 
+---
+
+| Afirmación incorrecta | Por qué |
+|---|---|
+| Es la probabilidad de que H0 sea verdadera | Se calcula asumiendo que H0 es verdadera |
+| Es la probabilidad de que el resultado se deba al azar | No describe el origen del dato observado |
+| Un valor pequeño indica un efecto grande | Depende también del tamaño de la muestra |
+| Garantiza que un nuevo estudio replicará el resultado | Resume una sola muestra, no predice otras |
+ 
+\note{Esta es la lámina más importante de la sesión y conviene no apresurarla. Leer la definición en voz alta y detenerse en la condición final, "si H0 fuera cierta": es la parte que casi siempre se omite. Recorrer la tabla fila por fila y pedir que alguien intente defender cada afirmación incorrecta antes de refutarla; discutir por qué parece razonable aunque no lo sea es más productivo que solo señalar el error.}
+ 
 ## Asociación entre dos variables categóricas
 
 Para variables categóricas se usa una tabla de contingencia y una prueba de independencia.

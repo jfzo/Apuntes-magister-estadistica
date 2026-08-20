@@ -336,19 +336,105 @@ Al trabajar con rangos en lugar de valores, el coeficiente de Spearman resulta r
 
 Cuando ambos coeficientes se calculan sobre el mismo par de variables y producen valores similares, es razonable asumir que la relación entre ellas es aproximadamente lineal. Cuando difieren de manera apreciable, esa diferencia es en sí misma informativa: sugiere que existe una asociación monótona más fuerte de lo que el coeficiente de Pearson por sí solo permite apreciar, probablemente debido a la influencia de valores extremos o a una relación de forma no lineal.
 
-### 5.3 La prueba de significancia: cor.test()
+### 5.3 El test de hipótesis y el valor p
 
-La función `cor()` devuelve únicamente el valor del coeficiente. La función `cor.test()` realiza, además, una prueba de hipótesis sobre si la correlación observada en la muestra es distinguible de una correlación nula en la población de la que esa muestra proviene:
+**La lógica del test.** Un test de hipótesis es un procedimiento para decidir, mediante una regla fijada de antemano, si los datos observados son incompatibles con una afirmación sobre la población. En la primera sesión del módulo se estableció que este razonamiento funciona de forma indirecta: nunca se prueba H1 de manera directa, sino que se evalúa cuán incompatibles son los datos con H0. El valor p, que ocupa el centro de esta sección, es la cifra que cuantifica esa incompatibilidad; pero antes de definirlo conviene fijar el procedimiento completo dentro del cual ese número adquiere su significado.
+
+El procedimiento consta de cinco elementos, que conviene entender como una secuencia de pasos y no como definiciones aisladas. Para fijarlos sirve una pregunta formulable sobre este corpus: si la duración media de lectura difiere entre dos lenguas.
+
+La **hipótesis nula**, H0, es la afirmación de partida y establece la ausencia de efecto: la duración media de lectura es igual en ambas lenguas. La **hipótesis alternativa**, H1, es lo que se sostiene si H0 se rechaza: las medias difieren. El **estadístico de prueba** es un único número que resume la discrepancia entre los datos observados y lo que H0 afirma; en este ejemplo, el estadístico t expresa la diferencia entre las dos medias muestrales en unidades de error estándar, de modo que un valor cercano a cero indica datos compatibles con H0 y un valor alejado de cero indica discrepancia. El **valor p**, que se define formalmente más abajo, traduce esa discrepancia a una probabilidad. Y la **decisión** compara el valor p con un umbral $\alpha$, habitualmente 0,05, que debe quedar fijado antes de examinar los datos: elegirlo después, a la vista del valor p obtenido, invalida el procedimiento, porque convierte la regla de decisión en una justificación del resultado que se quería obtener.
+
+En R, el test completo para este ejemplo se ejecuta en una línea:
+
+```r
+t.test(dur ~ lang, data = subset(fijadas, lang %in% c("es", "fi")))
+```
+
+Dos precisiones sobre la decisión, ambas consecuencia de la lógica de falsación vista en la primera sesión. Primera: el test puede rechazar H0 o no rechazarla, pero nunca aceptarla. No rechazar H0 no prueba que H0 sea verdadera; indica únicamente que los datos disponibles no bastan para descartarla, lo que es compatible tanto con la ausencia real de efecto como con una muestra insuficiente para detectarlo. Segunda: rechazar H0 no mide el tamaño del efecto. La decisión es binaria, y la magnitud de la diferencia debe reportarse por separado, con el estadístico descriptivo que corresponda.
+
+**Definición.** El valor p es la probabilidad de observar un resultado tan extremo, o más extremo, que el efectivamente obtenido, **si H0 fuera cierta**.
+
+La condición final de esa definición es la parte que con mayor frecuencia se omite al interpretar un valor p, y es también la parte que le da sentido a todo el procedimiento. El valor p no describe la probabilidad de nada relativo a los datos observados de manera aislada; describe qué tan probable sería un resultado como el obtenido, en un mundo hipotético donde la hipótesis nula es correcta. Un valor p pequeño indica que el resultado observado sería raro en ese mundo hipotético, lo que se interpreta como evidencia en contra de que ese mundo hipotético sea el real.
+
+**Cuatro interpretaciones incorrectas y frecuentes.** La tabla siguiente reúne afirmaciones que aparecen con regularidad en trabajos de investigación, y que no se siguen de la definición anterior.
+
+| Afirmación incorrecta | Por qué es incorrecta |
+|---|---|
+| El valor p es la probabilidad de que H0 sea verdadera | El valor p se calcula asumiendo que H0 es verdadera; no puede, al mismo tiempo, ser una medida de esa misma probabilidad. Esa cantidad exigiría un razonamiento distinto, de naturaleza bayesiana |
+| El valor p es la probabilidad de que el resultado se deba al azar | El valor p no asigna una probabilidad al origen del resultado observado; asigna una probabilidad a resultados hipotéticos futuros o alternativos, bajo un supuesto sobre la población |
+| Un valor p pequeño indica un efecto grande o importante | El valor p depende tanto de la magnitud del efecto como del tamaño de la muestra. Un efecto diminuto puede producir un valor p muy pequeño si la muestra es suficientemente grande, como se ilustra más adelante en esta sección |
+| Un valor p pequeño garantiza que un nuevo estudio replicará el resultado | El valor p resume la evidencia de una sola muestra; no hace ninguna afirmación sobre lo que ocurriría al repetir el estudio con una muestra distinta |
+
+**Construir la intuición mediante simulación.** La definición formal del valor p resulta más clara si se construye una vez sin recurrir a ninguna fórmula. El procedimiento, llamado prueba de permutación, consiste en romper deliberadamente cualquier asociación real entre dos variables, mezclando los valores de una de ellas al azar, y comprobar con qué frecuencia una asociación tan fuerte como la observada surge de todos modos por puro azar.
+
+```r
+r_obs <- cor(fijadas$long_palabra, fijadas$dur, method = "pearson")
+r_obs
+
+# Para que la simulacion se ejecute en tiempos razonables, conviene
+# trabajar sobre una muestra en lugar del conjunto de datos completo.
+set.seed(42)
+muestra <- fijadas[sample(nrow(fijadas), 3000), ]
+
+n_permutaciones <- 1000
+r_permutados <- numeric(n_permutaciones)
+
+for (i in seq_len(n_permutaciones)) {
+  dur_mezclado <- sample(muestra$dur)   # se rompe la asociacion real
+  r_permutados[i] <- cor(muestra$long_palabra, dur_mezclado,
+                         method = "pearson")
+}
+
+hist(r_permutados, breaks = 40,
+     main = "Correlaciones obtenidas cuando no hay asociacion real",
+     xlab = "Coeficiente de correlacion")
+abline(v = cor(muestra$long_palabra, muestra$dur), col = "red", lwd = 2)
+```
+
+Cada una de las mil repeticiones mezcla `dur` de forma aleatoria, de modo que en cada una de ellas la asociación entre longitud y duración se destruye por construcción. El histograma resultante muestra qué valores de correlación se obtienen únicamente por azar, en un escenario donde la hipótesis nula de ausencia de asociación es literalmente cierta. El valor p se obtiene entonces contando en qué proporción de esas mil repeticiones se alcanzó, solo por azar, una correlación tan extrema como la observada en los datos reales:
+
+```r
+r_obs_muestra <- cor(muestra$long_palabra, muestra$dur)
+
+p_permutacion <- mean(abs(r_permutados) >= abs(r_obs_muestra))
+p_permutacion
+```
+
+Ese número, obtenido sin ninguna fórmula ni tabla de distribución, es un valor p. Comparado con el que entrega `cor.test()` sobre la misma muestra, ambos deberían ser similares:
+
+```r
+cor.test(muestra$long_palabra, muestra$dur)$p.value
+```
+
+La diferencia entre ambos procedimientos es de método, no de concepto: `cor.test()` calcula el valor p mediante una fórmula que asume una distribución teórica conocida para el coeficiente de correlación bajo H0, mientras que la permutación lo estima generando esa distribución de forma empírica, mezclando los datos una y otra vez. Cuando los supuestos de la fórmula se cumplen razonablemente, ambos métodos convergen al mismo resultado.
+
+**Del estadístico al valor p.** La relación entre el test ejecutado y el valor p obtenido puede resumirse ahora con precisión. El test reduce el conjunto completo de datos a un único número, el estadístico observado. Bajo H0, ese estadístico tiene una distribución conocida, centrada en cero: la distribución de los valores que el estadístico tomaría si la hipótesis nula fuera cierta y el estudio se repitiera una y otra vez con muestras nuevas. El valor p es la proporción de esa distribución que resulta tan extrema o más que el valor efectivamente observado. La simulación por permutación de esta misma sección construyó esa distribución de forma empírica: el histograma de `r_permutados` es, exactamente, la distribución del estadístico bajo H0, obtenida mezclando los datos en lugar de derivarse de una fórmula.
+
+Sobre la salida de un test en R, esta correspondencia permite leer cada componente como un paso del procedimiento y no como una cifra aislada:
+
+```r
+res <- t.test(dur ~ lang, data = subset(fijadas, lang %in% c("es", "fi")))
+
+res$statistic   # el t observado: la discrepancia resumida en un numero
+res$parameter   # los grados de libertad: fijan la forma de la distribucion bajo H0
+res$p.value     # la proporcion de esa distribucion mas extrema que el t observado
+```
+
+De esta correspondencia se siguen dos relaciones que conviene tener presentes al interpretar cualquier salida. La primera es la relación inversa entre el estadístico y el valor p: cuanto más lejos de cero cae el t observado, menor es el área de la distribución que queda más allá de él, y por tanto menor el valor p. La segunda involucra el tamaño de la muestra: los grados de libertad dependen del número de observaciones, y con muestras grandes la distribución del estadístico bajo H0 se concentra alrededor de cero, de modo que una misma magnitud de efecto produce un estadístico mayor y un valor p menor. Esta es la vía exacta por la que el tamaño muestral empuja el valor p hacia cero, el fenómeno señalado en la tercera fila de la tabla de interpretaciones incorrectas, y que el bloque siguiente ilustra con un caso real del corpus.
+
+**Significancia frente a magnitud, con un caso concreto.** El resultado obtenido en la sección 5.1, sobre el coeficiente de correlación entre `long_palabra` y `dur` calculado sobre el conjunto completo de palabras fijadas, permite ilustrar la tercera fila de la tabla anterior con un caso real. Ese coeficiente, calculado sobre varios cientos de miles de observaciones, produce casi con certeza un valor p extremadamente pequeño, incluso si su magnitud, el propio valor de r, es modesta. El tamaño de la muestra empuja el valor p hacia cero con independencia de qué tan fuerte sea la asociación, porque cuantas más observaciones se acumulan, más precisa es la estimación del coeficiente, y una estimación precisa de un efecto pequeño sigue siendo distinguible de cero, aunque ese efecto carezca de relevancia práctica.
+
+### 5.4 La prueba de significancia: cor.test()
+
+La función `cor()` devuelve únicamente el valor del coeficiente. La función `cor.test()` aplica el razonamiento de la sección anterior de forma automática, mediante una fórmula, y añade al coeficiente un intervalo de confianza y el valor p correspondiente:
 
 ```r
 cor.test(fijadas$long_palabra, fijadas$dur, method = "pearson")
 ```
 
-El resultado incluye, entre otros componentes, un intervalo de confianza para el coeficiente y un valor p. El valor p indica la probabilidad de observar una correlación tan extrema como la obtenida, o más extrema, si la correlación real en la población fuera exactamente cero. Un valor p pequeño lleva a rechazar esa hipótesis de correlación nula.
+Un valor p pequeño lleva a rechazar la hipótesis nula de correlación igual a cero en la población. Pero, como se estableció en la sección 5.3, ese rechazo no informa por sí solo sobre la magnitud de la correlación, y reportar únicamente que un resultado fue "significativo" sin indicar el valor del coeficiente es, con muestras del tamaño de este corpus, una afirmación de escaso valor informativo. El coeficiente y el valor p deben reportarse juntos, nunca uno en lugar del otro.
 
-Es necesario advertir sobre una interpretación errónea frecuente de este resultado. Con un número de observaciones tan grande como el de este corpus, del orden de cientos de miles, prácticamente cualquier correlación distinta de cero resultará estadísticamente significativa, incluso si su magnitud es tan pequeña que carece de interés práctico. El valor p informa sobre la existencia de una asociación distinguible del azar; la magnitud del coeficiente informa sobre la fuerza de esa asociación. Ambas piezas de información son necesarias y ninguna sustituye a la otra. Reportar únicamente que una correlación fue "significativa" sin indicar su magnitud es, con muestras de este tamaño, una afirmación de escaso valor informativo.
-
-### 5.4 Prueba de independencia chi-cuadrado
+### 5.5 Prueba de independencia chi-cuadrado
 
 Cuando ambas variables son categóricas, el coeficiente de correlación no es aplicable, porque su cálculo requiere valores numéricos ordenables. La herramienta equivalente para dos variables categóricas es la tabla de contingencia y la prueba de independencia chi-cuadrado.
 
@@ -388,9 +474,13 @@ La prueba chi-cuadrado requiere que las frecuencias esperadas en cada celda no s
 
 **5.2** Ejecuta `cor.test()` entre `long_palabra` y `dur`. Extrae el coeficiente, el intervalo de confianza y el valor p de los componentes del resultado, y redacta una sola frase que reporte los tres de forma conjunta, siguiendo un formato adecuado para un informe de investigación.
 
-**5.3** Construye la tabla de contingencia entre `meco$skip` y `meco$lang`. Ejecuta `chisq.test()` sobre esa tabla y reporta el estadístico, los grados de libertad y el valor p.
+**5.3** Repite el procedimiento de permutación de la sección 5.3, pero sobre una muestra de 500 observaciones en lugar de 3000. Ejecuta la simulación completa y compara el valor p que obtienes con el que entrega `cor.test()` sobre esa misma muestra de 500 observaciones. Explica si el valor p de la permutación se vuelve más o menos estable al reducir el número de repeticiones de 1000 a 100, manteniendo el tamaño de la muestra en 500.
 
-**5.4** A partir del resultado de la actividad 5.3, extrae las frecuencias esperadas con `resultado$expected` y calcula la diferencia entre la tabla observada y la tabla esperada, celda por celda. Identifica la lengua donde esa diferencia es mayor en valor absoluto, dentro de la fila correspondiente a las palabras omitidas, y redacta una interpretación de ese resultado.
+**5.4** Toma el resultado de `cor.test()` obtenido en la actividad 5.2. Para cada una de las cuatro afirmaciones incorrectas listadas en la tabla de la sección 5.3, redacta una frase que explique por qué no correspondería aplicarla a ese resultado concreto.
+
+**5.5** Construye la tabla de contingencia entre `meco$skip` y `meco$lang`. Ejecuta `chisq.test()` sobre esa tabla y reporta el estadístico, los grados de libertad y el valor p.
+
+**5.6** A partir del resultado de la actividad 5.5, extrae las frecuencias esperadas con `resultado$expected` y calcula la diferencia entre la tabla observada y la tabla esperada, celda por celda. Identifica la lengua donde esa diferencia es mayor en valor absoluto, dentro de la fila correspondiente a las palabras omitidas, y redacta una interpretación de ese resultado.
 
 ## 6. Extensión: aplicar las medidas a tus lenguas
 
