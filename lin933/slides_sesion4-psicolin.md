@@ -228,8 +228,6 @@ IQR <- Q3 - Q1
 limite_inferior <- Q1 - 1.5 * IQR
 limite_superior <- Q3 + 1.5 * IQR
 
-c(limite_inferior, limite_superior)
-
 atipicos <- subset(fijadas, dur < limite_inferior | dur > limite_superior)
 nrow(atipicos)
 round(nrow(atipicos) / nrow(fijadas) * 100, 2)
@@ -364,11 +362,14 @@ El valor p cuantifica esa incompatibilidad:
  
 Probabilidad de observar un resultado tan extremo, o más extremo, que el obtenido, **si $H_0$ fuera cierta**.
  
+
 ---
+
+\vspace{25pt}
 
 \small
 
-| Afirmación incorrecta | Por qué |
+| **Afirmación incorrectas** | *Por qué* |
 |---|---|
 | Es la probabilidad de que H0 sea verdadera | Se calcula asumiendo que H0 es verdadera |
 | Es la probabilidad de que el resultado se deba al azar | No describe el origen del dato observado |
