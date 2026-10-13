@@ -1,0 +1,682 @@
+% Caso: "¿Aprobará el examen?" - Presentación Beamer (versión revisada)
+% Red bayesiana con 5 variables discretas: estructura, CPDs, inferencia paso a paso,
+% código con pgmpy (>= 1.0), aprendizaje de parámetros y ejercicios resueltos.
+% Compilar con pdflatex (2 pasadas) o lualatex/xelatex.
+
+\documentclass[11pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{dolphin}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, babel}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue!60!black},
+  commentstyle=\color{gray},
+  stringstyle=\color{green!40!black},
+  showstringspaces=false,
+  columns=fullflexible,
+  keepspaces=true
+}
+
+\newcommand{\Pp}[1]{P\!\left(#1\right)}
+
+\title[¿Aprobará el examen?]{Redes bayesianas: el caso «¿Aprobará el examen?»}
+\author[JZ]{Prof. J. Z.}
+\institute[Magíster en Estadística]{Magíster en Estadística\\Curso de Machine Learning}
+\date{\today}
+
+\begin{document}
+
+% ------------------------------------------------------------------ Portada
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% ------------------------------------------------------------------ Agenda
+\begin{frame}{Agenda}
+  \begin{itemize}
+    \item Problema y variables
+    \item Estructura del modelo (DAG) y qué supone
+    \item Tablas de probabilidad condicional (CPDs)
+    \item Cómo se responde una consulta: método general
+    \item Cinco consultas resueltas paso a paso
+    \item Implementación con \texttt{pgmpy}
+    \item Estimación de las CPDs a partir de datos
+    \item Del ejemplo a un problema real
+    \item Ejercicios con solución
+  \end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------------ Objetivos
+\begin{frame}{Qué esperamos que puedan hacer al terminar}
+  \begin{enumerate}
+    \item Traducir un problema con incertidumbre a un grafo dirigido acíclico y sus tablas.
+    \item Contar los parámetros de una red y compararlos con los de la conjunta completa.
+    \item Leer del grafo qué variables son independientes y cuándo dejan de serlo.
+    \item Calcular a mano consultas predictivas y diagnósticas, y verificarlas con \texttt{pgmpy}.
+    \item Estimar las tablas a partir de datos y juzgar si la estimación es razonable.
+  \end{enumerate}
+\end{frame}
+
+% ------------------------------------------------------------------ Problema
+\begin{frame}{El problema}
+  Queremos estimar la probabilidad de que un estudiante apruebe un examen a partir de lo que sabemos de su preparación. Modelamos cinco variables, todas binarias para que los cálculos se puedan hacer a mano:
+
+  \vspace{0.3cm}
+  \small
+  \begin{tabular}{llll}
+    \toprule
+    Símbolo & Variable & Significado & Estados \\
+    \midrule
+    $A$ & Attendance & Asistencia a clases & High, Low \\
+    $S$ & Sleep & Calidad del sueño la noche anterior & Good, Poor \\
+    $E$ & Study & Estudió para el examen & Yes, No \\
+    $X$ & Stress & Nivel de estrés durante el examen & Low, High \\
+    $R$ & Pass & Resultado del examen & Pass, Fail \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+% ------------------------------------------------------------------ DAG
+\begin{frame}{Estructura del modelo (DAG)}
+  \begin{columns}[T]
+    \begin{column}{0.58\textwidth}
+      \centering
+      \scalebox{0.82}{%
+      \begin{tikzpicture}[>=Stealth,
+          var/.style={draw, rounded corners=3pt, minimum width=2.5cm,
+                      minimum height=0.85cm, fill=blue!8}]
+        \node[var] (A) at (0,0)    {Attendance};
+        \node[var] (S) at (5,0)    {Sleep};
+        \node[var] (E) at (0,-2.4) {Study};
+        \node[var] (X) at (5,-2.4) {Stress};
+        \node[var] (R) at (2.5,-4.8) {Pass};
+
+        \draw[-{Stealth}, thick] (A) -- (E);
+        \draw[-{Stealth}, thick] (S) -- (E);
+        \draw[-{Stealth}, thick] (S) -- (X);
+        \draw[-{Stealth}, thick] (E) -- (R);
+        \draw[-{Stealth}, thick] (X) -- (R);
+      \end{tikzpicture}}
+    \end{column}
+    \begin{column}{0.40\textwidth}
+      \small
+      Cada flecha indica que la distribución de una variable se especifica condicionada a sus padres.
+      \begin{itemize}
+        \item Asistir y dormir bien influyen en si el estudiante estudia.
+        \item Dormir mal aumenta el estrés.
+        \item Estudiar y el estrés determinan el resultado.
+      \end{itemize}
+    \end{column}
+  \end{columns}
+
+  \vspace{0.5cm}
+  \footnotesize Las flechas son supuestos del modelador. Para hacer inferencia probabilística basta con que el grafo codifique las independencias correctas; leerlas como efectos causales es una hipótesis adicional.
+\end{frame}
+
+% ------------------------------------------------------------------ Factorización
+\begin{frame}{Qué implica el grafo: factorización y número de parámetros}
+  La conjunta se factoriza como el producto de cada variable dada sus padres:
+  \[
+    \Pp{A,S,E,X,R} = \Pp{A}\,\Pp{S}\,\Pp{E\mid A,S}\,\Pp{X\mid S}\,\Pp{R\mid E,X}.
+  \]
+
+  \vspace{0.2cm}
+  Parámetros libres (una probabilidad por cada fila de las CPDs, ya que cada columna suma 1):
+
+  \vspace{0.1cm}
+  \centering
+  \small
+  \begin{tabular}{lcccccc}
+    \toprule
+    Factor & $\Pp{A}$ & $\Pp{S}$ & $\Pp{E\mid A,S}$ & $\Pp{X\mid S}$ & $\Pp{R\mid E,X}$ & Total \\
+    \midrule
+    Parámetros & 1 & 1 & 4 & 2 & 4 & \textbf{12} \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.3cm}
+  \raggedright
+  La conjunta sin estructura sobre 5 variables binarias tiene $2^5-1=31$ parámetros. La red usa 12. La diferencia crece rápidamente con el número de variables, y ese ahorro es lo que hace manejable estimar y almacenar el modelo.
+\end{frame}
+
+% ------------------------------------------------------------------ Independencias
+\begin{frame}{Qué independencias dice el grafo}
+  Tres patrones aparecen en este DAG:
+
+  \vspace{0.2cm}
+  \begin{tabular}{lll}
+    \toprule
+    Patrón & Aparece en & Consecuencia \\
+    \midrule
+    Cadena & $A \to E \to R$ & $A \not\perp R$, pero $A \perp R \mid E, X$ \\
+    Bifurcación & $E \leftarrow S \rightarrow X$ & $E \not\perp X$, pero $E \perp X \mid S$ \\
+    Colisionador & $A \to E \leftarrow S$ & $A \perp S$, pero $A \not\perp S \mid E$ \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.3cm}
+  El colisionador es el caso menos intuitivo: $A$ y $S$ son independientes a priori, y observar $E$ (o un descendiente de $E$) los vuelve dependientes. Lo veremos con números en el Ejemplo 3.
+
+  \vspace{0.2cm}
+  \footnotesize Estas relaciones se pueden verificar en \texttt{pgmpy} con \texttt{model.is\_dconnected(...)}.
+\end{frame}
+
+% ------------------------------------------------------------------ CPDs 1/3
+\begin{frame}{CPDs 1/3: variables sin padres}
+  \small
+  \textbf{$\Pp{A}$}\\[0.1cm]
+  \begin{tabular}{lcc}
+    \toprule
+    & High & Low \\
+    \midrule
+    Prob. & 0.7 & 0.3 \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.3cm}
+  \textbf{$\Pp{S}$}\\[0.1cm]
+  \begin{tabular}{lcc}
+    \toprule
+    & Good & Poor \\
+    \midrule
+    Prob. & 0.6 & 0.4 \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.4cm}
+  \normalsize
+  Cómo leer una CPD: cada columna corresponde a una combinación de valores de los padres, y los números de esa columna suman 1.
+\end{frame}
+
+% ------------------------------------------------------------------ CPDs 2/3
+\begin{frame}{CPDs 2/3: estudiar y estrés}
+  \small
+  \textbf{$\Pp{E\mid A,S}$}\\[0.1cm]
+  \begin{tabular}{lcccc}
+    \toprule
+    $(A,S)$ & (High, Good) & (High, Poor) & (Low, Good) & (Low, Poor) \\
+    \midrule
+    $E$ = Yes & 0.90 & 0.70 & 0.60 & 0.20 \\
+    $E$ = No  & 0.10 & 0.30 & 0.40 & 0.80 \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.4cm}
+  \textbf{$\Pp{X\mid S}$}\\[0.1cm]
+  \begin{tabular}{lcc}
+    \toprule
+    $S$ & $X$ = Low & $X$ = High \\
+    \midrule
+    Good & 0.8 & 0.2 \\
+    Poor & 0.3 & 0.7 \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.3cm}
+  \normalsize
+  Aquí la tabla de $X$ está escrita con una fila por valor del padre, y la de $E$ con una columna por combinación de padres. Es solo una decisión de formato; en las dos, las probabilidades de cada valor del padre suman 1.
+\end{frame}
+
+% ------------------------------------------------------------------ CPDs 3/3
+\begin{frame}{CPDs 3/3: resultado del examen}
+  \small
+  \textbf{$\Pp{R\mid E,X}$}\\[0.1cm]
+  \begin{tabular}{lcccc}
+    \toprule
+    $(E,X)$ & (Yes, Low) & (Yes, High) & (No, Low) & (No, High) \\
+    \midrule
+    $R$ = Pass & 0.95 & 0.80 & 0.60 & 0.10 \\
+    $R$ = Fail & 0.05 & 0.20 & 0.40 & 0.90 \\
+    \bottomrule
+  \end{tabular}
+
+  \vspace{0.4cm}
+  \normalsize
+  Con estas cinco tablas el modelo está completo. Los valores son ilustrativos: en una aplicación real vendrían de datos, de la literatura o del juicio de expertos.
+\end{frame}
+
+% ------------------------------------------------------------------ Método general
+\begin{frame}{Cómo se responde una consulta}
+  Queremos $\Pp{Q\mid e}$, con $Q$ la variable de interés, $e$ la evidencia observada y $H$ las variables restantes.
+
+  \begin{enumerate}
+    \item Escribir la conjunta usando la factorización del grafo.
+    \item Fijar la evidencia $e$ en los factores que la contienen.
+    \item Sumar sobre las variables ocultas $H$.
+    \item Normalizar dividiendo por $\Pp{e}$.
+  \end{enumerate}
+  \[
+    \Pp{Q=q\mid e}=\frac{\sum_{h}\Pp{q,e,h}}{\sum_{q'}\sum_{h}\Pp{q',e,h}}
+  \]
+
+  Dos atajos que usaremos:
+  \begin{itemize}
+    \item Un factor que no contiene la variable que se suma sale de la suma.
+    \item Una variable no observada que no es ancestro de $Q$ ni de la evidencia se suma a 1 y se puede ignorar.
+  \end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------------ Ejemplo 1
+\begin{frame}{Ejemplo 1 (predictiva): $\Pp{R=\text{Pass}\mid A=\text{High},S=\text{Good}}$}
+  Las variables ocultas son $E$ y $X$.
+
+  \medskip
+  \textbf{Paso 1.} Con $A$ y $S$ fijos, los factores $\Pp{A}\Pp{S}$ son constantes y se cancelan al normalizar:
+  \[
+    \Pp{R\mid a,s}=\sum_{e,x}\Pp{R\mid e,x}\,\Pp{e\mid a,s}\,\Pp{x\mid s}.
+  \]
+  \textbf{Paso 2.} Leemos de las tablas, con $(a,s)=(\text{High},\text{Good})$:
+  \[
+    \Pp{E=\text{Yes}\mid\text{High},\text{Good}}=0.9,\qquad
+    \Pp{X=\text{Low}\mid\text{Good}}=0.8.
+  \]
+  Las probabilidades complementarias son $\Pp{E=\text{No}\mid\cdot}=0.1$ y $\Pp{X=\text{High}\mid\text{Good}}=0.2$.
+
+  \medskip
+  \textbf{Paso 3.} Enumeramos las cuatro combinaciones de $(E,X)$ en la siguiente diapositiva.
+\end{frame}
+
+\begin{frame}{Ejemplo 1: la suma}
+  \footnotesize
+  \begin{center}
+  \begin{tabular}{llcccc}
+    \toprule
+    $E$ & $X$ & $\Pp{e\mid\text{H},\text{G}}$ & $\Pp{x\mid\text{G}}$ & $\Pp{R=\text{Pass}\mid e,x}$ & Producto \\
+    \midrule
+    Yes & Low  & 0.9 & 0.8 & 0.95 & $0.9\cdot0.8\cdot0.95=0.684$ \\
+    Yes & High & 0.9 & 0.2 & 0.80 & $0.9\cdot0.2\cdot0.80=0.144$ \\
+    No  & Low  & 0.1 & 0.8 & 0.60 & $0.1\cdot0.8\cdot0.60=0.048$ \\
+    No  & High & 0.1 & 0.2 & 0.10 & $0.1\cdot0.2\cdot0.10=0.002$ \\
+    \midrule
+    \multicolumn{5}{r}{Suma} & \textbf{0.878} \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \normalsize
+  \textbf{Paso 4.} No hay que normalizar: la evidencia ya incluye todo lo que condiciona, y los pesos $\Pp{e\mid a,s}\Pp{x\mid s}$ de las cuatro filas suman $0.72+0.18+0.08+0.02=1$.
+
+  \medskip
+  \textbf{Resultado:} $\Pp{R=\text{Pass}\mid A=\text{High},S=\text{Good}}=0.878$.
+\end{frame}
+
+% ------------------------------------------------------------------ Ejemplo 2
+\begin{frame}{Ejemplo 2 (diagnóstica): $\Pp{E=\text{Yes}\mid R=\text{Pass},A=\text{High},S=\text{Good}}$}
+  Ahora observamos el resultado y preguntamos por una causa. Por la definición de probabilidad condicional:
+  \[
+    \Pp{E=\text{Yes}\mid R=\text{Pass},a,s}=\frac{\Pp{E=\text{Yes},R=\text{Pass}\mid a,s}}{\Pp{R=\text{Pass}\mid a,s}}.
+  \]
+  \textbf{Numerador} (sumamos solo sobre $X$):
+  \begin{align*}
+    &\Pp{E=\text{Yes}\mid\text{H},\text{G}}\sum_{x}\Pp{x\mid\text{G}}\Pp{\text{Pass}\mid\text{Yes},x}\\
+    &=0.9\,(0.8\cdot0.95+0.2\cdot0.80)=0.9\cdot0.92=0.828.
+  \end{align*}
+  \textbf{Denominador:} es el resultado del Ejemplo 1, $0.878$. Como comprobación, el numerador para $E=\text{No}$ es $0.1\,(0.8\cdot0.60+0.2\cdot0.10)=0.05$, y $0.828+0.05=0.878$.
+
+  \[
+    \Pp{E=\text{Yes}\mid\text{Pass},\text{H},\text{G}}=\frac{0.828}{0.878}\approx 0.943.
+  \]
+\end{frame}
+
+\begin{frame}{Ejemplo 2: cómo interpretar el resultado}
+  La probabilidad a priori de estudiar, dados $A=\text{High}$ y $S=\text{Good}$, era $0.90$. Tras observar que aprobó, sube a $0.943$ (y la de no haber estudiado baja de $0.10$ a $0.057$).
+
+  \medskip
+  El cambio es moderado porque la creencia previa ya era alta y porque aprobar sin estudiar sigue siendo posible: $\Pp{\text{Pass}\mid E=\text{No}}$ vale $0.60$ con estrés bajo.
+
+  \medskip
+  En general, la evidencia cambia más las creencias cuando la variable observada discrimina bien entre los valores de la variable oculta, es decir, cuando las dos verosimilitudes ($0.92$ frente a $0.50$ aquí) son muy distintas.
+\end{frame}
+
+% ------------------------------------------------------------------ Ejemplo 3
+\begin{frame}{Ejemplo 3 (colisionador): $\Pp{S=\text{Poor}\mid E=\text{No},\,A}$}
+  A priori $\Pp{S=\text{Poor}}=0.40$. Observamos que el estudiante \emph{no estudió}. $X$ y $R$ no son ancestros de $S$ ni de $E$, así que se suman a 1 y se ignoran.
+
+  \medskip
+  \textbf{Solo con $E=\text{No}$.} Sumamos sobre $A$:
+  \begin{align*}
+    \Pp{\text{No}\mid S=\text{Poor}}&=0.7\cdot0.3+0.3\cdot0.8=0.45,\\
+    \Pp{\text{No}\mid S=\text{Good}}&=0.7\cdot0.1+0.3\cdot0.4=0.19,
+  \end{align*}
+  \[
+    \Pp{S=\text{Poor}\mid E=\text{No}}=\frac{0.4\cdot0.45}{0.4\cdot0.45+0.6\cdot0.19}=\frac{0.180}{0.294}\approx0.612.
+  \]
+  \textbf{Además $A=\text{Low}$:} $\dfrac{0.4\cdot0.8}{0.4\cdot0.8+0.6\cdot0.4}=\dfrac{0.32}{0.56}\approx0.571$.
+
+  \textbf{Además $A=\text{High}$:} $\dfrac{0.4\cdot0.3}{0.4\cdot0.3+0.6\cdot0.1}=\dfrac{0.12}{0.18}\approx0.667$.
+\end{frame}
+
+\begin{frame}{Ejemplo 3: qué muestra}
+  \begin{center}
+  \begin{tabular}{lc}
+    \toprule
+    Evidencia & $\Pp{S=\text{Poor}\mid\cdot}$ \\
+    \midrule
+    ninguna & 0.400 \\
+    $E=\text{No}$ & 0.612 \\
+    $E=\text{No}$, $A=\text{Low}$ & 0.571 \\
+    $E=\text{No}$, $A=\text{High}$ & 0.667 \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \medskip
+  $A$ y $S$ son independientes a priori, pero una vez que sabemos que no estudió, conocer $A$ cambia lo que creemos de $S$. Si faltó a clases, esa ya es una explicación posible de que no estudiara y el mal sueño pierde apoyo. Si asistió, la explicación que queda es el mal sueño y su probabilidad sube.
+
+  \medskip
+  A este fenómeno se le llama \emph{explaining away} y es una consecuencia directa de condicionar sobre un colisionador.
+\end{frame}
+
+% ------------------------------------------------------------------ Ejemplo 4
+\begin{frame}{Ejemplo 4 (marginal): $\Pp{R=\text{Pass}}$}
+  Se repite el procedimiento del Ejemplo 1 para cada combinación de $(A,S)$ y se promedia con los pesos $\Pp{A}\Pp{S}$ (son independientes):
+  \[
+    \Pp{R=\text{Pass}}=\sum_{a,s}\Pp{a}\Pp{s}\,\Pp{R=\text{Pass}\mid a,s}.
+  \]
+  \small
+  \begin{center}
+  \begin{tabular}{llccc}
+    \toprule
+    $A$ & $S$ & $\Pp{a}\Pp{s}$ & $\Pp{\text{Pass}\mid a,s}$ & Producto \\
+    \midrule
+    High & Good & 0.42 & 0.8780 & 0.36876 \\
+    High & Poor & 0.28 & 0.6665 & 0.18662 \\
+    Low  & Good & 0.18 & 0.7520 & 0.13536 \\
+    Low  & Poor & 0.12 & 0.3690 & 0.04428 \\
+    \midrule
+    \multicolumn{4}{r}{Suma} & \textbf{0.73502} \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+  \normalsize
+  La probabilidad de aprobar sin información sobre el estudiante es $0.735$. Que sea menor que $0.878$ refleja que el caso (High, Good) es el más favorable.
+\end{frame}
+
+% ------------------------------------------------------------------ Ejemplo 5
+\begin{frame}{Ejemplo 5 (diagnóstica sobre el sueño): $\Pp{S=\text{Poor}\mid R=\text{Fail}}$}
+  \textbf{Paso 1.} Como $A\perp S$, se tiene $\Pp{\text{Fail}\mid s}=\sum_a\Pp{a}\,\bigl(1-\Pp{\text{Pass}\mid a,s}\bigr)$, usando la tabla del Ejemplo 4:
+  \begin{align*}
+    \Pp{\text{Fail}\mid S=\text{Good}}&=0.7\,(1-0.878)+0.3\,(1-0.752)=0.1598,\\
+    \Pp{\text{Fail}\mid S=\text{Poor}}&=0.7\,(1-0.6665)+0.3\,(1-0.369)=0.42275.
+  \end{align*}
+  \textbf{Paso 2.} Aplicamos Bayes con la prior $\Pp{S=\text{Poor}}=0.4$:
+  \[
+    \Pp{S=\text{Poor}\mid\text{Fail}}
+    =\frac{0.4\cdot0.42275}{0.4\cdot0.42275+0.6\cdot0.1598}
+    =\frac{0.1691}{0.2650}\approx0.638.
+  \]
+  Saber que reprobó sube la probabilidad de haber dormido mal de $0.40$ a $0.638$.
+\end{frame}
+
+% ------------------------------------------------------------------ Código 1/3
+\begin{frame}[fragile]{Código 1/3: estructura y primeras CPDs}
+\begin{lstlisting}
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.factors.discrete import TabularCPD
+from pgmpy.inference import VariableElimination
+
+model = DiscreteBayesianNetwork([
+    ("Attendance", "Study"), ("Sleep", "Study"),
+    ("Sleep", "Stress"), ("Study", "Pass"), ("Stress", "Pass")])
+
+cpd_A = TabularCPD("Attendance", 2, [[0.7], [0.3]],
+    state_names={"Attendance": ["High", "Low"]})
+cpd_S = TabularCPD("Sleep", 2, [[0.6], [0.4]],
+    state_names={"Sleep": ["Good", "Poor"]})
+
+# Columnas: (A,S) = (H,G), (H,P), (L,G), (L,P).
+# La primera variable de "evidence" es la que cambia mas lento.
+cpd_E = TabularCPD("Study", 2,
+    [[0.9, 0.7, 0.6, 0.2],     # Study = Yes
+     [0.1, 0.3, 0.4, 0.8]],    # Study = No
+    evidence=["Attendance", "Sleep"], evidence_card=[2, 2],
+    state_names={"Study": ["Yes", "No"],
+                 "Attendance": ["High", "Low"],
+                 "Sleep": ["Good", "Poor"]})
+\end{lstlisting}
+\end{frame}
+
+% ------------------------------------------------------------------ Código 2/3
+\begin{frame}[fragile]{Código 2/3: resto de las CPDs y verificación del modelo}
+\begin{lstlisting}
+cpd_X = TabularCPD("Stress", 2,
+    [[0.8, 0.3],               # Stress = Low
+     [0.2, 0.7]],              # Stress = High
+    evidence=["Sleep"], evidence_card=[2],
+    state_names={"Stress": ["Low", "High"],
+                 "Sleep": ["Good", "Poor"]})
+
+# Columnas: (E,X) = (Y,Low), (Y,High), (N,Low), (N,High)
+cpd_R = TabularCPD("Pass", 2,
+    [[0.95, 0.80, 0.60, 0.10], # Pass = Pass
+     [0.05, 0.20, 0.40, 0.90]],# Pass = Fail
+    evidence=["Study", "Stress"], evidence_card=[2, 2],
+    state_names={"Pass": ["Pass", "Fail"],
+                 "Study": ["Yes", "No"],
+                 "Stress": ["Low", "High"]})
+
+model.add_cpds(cpd_A, cpd_S, cpd_E, cpd_X, cpd_R)
+print(model.check_model())   # True si estructura y CPDs son coherentes
+\end{lstlisting}
+  \small
+  \texttt{check\_model()} comprueba, entre otras cosas, que cada columna sume 1 y que las dimensiones coincidan con el grafo.
+\end{frame}
+
+% ------------------------------------------------------------------ Código 3/3
+\begin{frame}[fragile]{Código 3/3: consultas y comprobación de independencias}
+\begin{lstlisting}
+infer = VariableElimination(model)
+
+# Ejemplo 1: 0.8780
+infer.query(["Pass"], evidence={"Attendance": "High", "Sleep": "Good"})
+# Ejemplo 2: 0.9431
+infer.query(["Study"], evidence={"Pass": "Pass",
+                                 "Attendance": "High", "Sleep": "Good"})
+# Ejemplo 3: 0.5714
+infer.query(["Sleep"], evidence={"Study": "No", "Attendance": "Low"})
+# Ejemplo 4: 0.7350
+infer.query(["Pass"])
+
+# Colisionador: independientes sin evidencia, dependientes dado Study
+model.is_dconnected("Attendance", "Sleep")                      # False
+model.is_dconnected("Attendance", "Sleep", observed=["Study"])  # True
+\end{lstlisting}
+  \small
+  Los valores en los comentarios coinciden con los cálculos manuales (pgmpy 1.1.2). \texttt{VariableElimination} automatiza los pasos de suma y normalización que hicimos a mano.
+\end{frame}
+
+% ------------------------------------------------------------------ Aprendizaje
+\begin{frame}[fragile]{Estimar las CPDs a partir de datos}
+  Con datos completos, el estimador de máxima verosimilitud de cada entrada es una frecuencia relativa:
+  \[
+    \hat\theta_{x\mid pa}=\frac{N(x,pa)}{N(pa)}.
+  \]
+\begin{lstlisting}
+from pgmpy.sampling import BayesianModelSampling
+
+data = BayesianModelSampling(model).forward_sample(size=1000, seed=42)
+learned = DiscreteBayesianNetwork(model.edges())
+learned.fit(data)                  # por defecto, maxima verosimilitud
+print(learned.get_cpds("Study"))
+\end{lstlisting}
+  \small
+  Resultado para $\Pp{E=\text{Yes}\mid A,S}$ con $n=1000$ filas simuladas (semilla 42):
+
+  \begin{tabular}{lcccc}
+    \toprule
+    $(A,S)$ & (H,G) & (H,P) & (L,G) & (L,P) \\
+    \midrule
+    Verdadero & 0.90 & 0.70 & 0.60 & 0.20 \\
+    Estimado  & 0.894 & 0.723 & 0.558 & 0.201 \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+\begin{frame}{Estimar las CPDs: qué mirar}
+  \begin{itemize}
+    \item \textbf{Error de muestreo.} Cada columna se estima con las filas que tienen esa combinación de padres. Con $n=1000$, la combinación (Low, Poor) tiene unas $1000\cdot0.3\cdot0.4=120$ filas esperadas, y el error estándar de una proporción cercana a $0.2$ es $\sqrt{0.2\cdot0.8/120}\approx0.037$. Las diferencias de la tabla anterior están en ese orden.
+    \item \textbf{Combinaciones poco frecuentes.} Si una combinación de padres casi no aparece, la frecuencia relativa es inestable o ni siquiera está definida. Un estimador bayesiano con una prior de Dirichlet (\texttt{BayesianEstimator} en \texttt{pgmpy}) evita probabilidades iguales a 0.
+    \item \textbf{Orden de los estados.} Al aprender desde un \texttt{DataFrame}, \texttt{pgmpy} ordena los estados alfabéticamente (aquí \emph{No} antes de \emph{Yes}). Al comparar con las tablas de la presentación hay que alinear las filas.
+    \item \textbf{Cuántos parámetros por fila de datos.} Una CPD con muchos padres crece exponencialmente y deja pocas observaciones por columna; es una razón práctica para mantener pocos padres por nodo.
+  \end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------------ Problema real
+\begin{frame}{Del ejemplo a un problema real}
+  \footnotesize
+  \begin{tabular}{p{0.18\textwidth}p{0.72\textwidth}}
+    \toprule
+    Etapa & Qué hacer \\
+    \midrule
+    1. Pregunta & Definir qué consultas se necesitan: qué variable se predice y qué evidencia estará disponible en la práctica. \\
+    2. Variables & Elegir variables y estados. Las continuas se discretizan o se modelan con distribuciones condicionales continuas. \\
+    3. Estructura & Construirla con conocimiento experto, aprenderla de los datos (por ejemplo, con algoritmos basados en restricciones o en puntajes), o combinar ambas fuentes. \\
+    4. Parámetros & Estimar las CPDs por máxima verosimilitud o con priors. Revisar combinaciones de padres con pocos datos. \\
+    5. Validación & Evaluar la predicción en datos no usados para estimar (verosimilitud, calibración, métricas de clasificación) y hacer análisis de sensibilidad sobre las CPDs más inciertas. \\
+    6. Uso & Consultar el modelo. Si los datos son observacionales, interpretar las flechas como causales requiere supuestos adicionales. Con muchas variables, el costo de la inferencia exacta depende del tamaño de los factores que aparecen al eliminar variables, no solo del número de nodos. \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
+
+% ------------------------------------------------------------------ Ejercicios
+\begin{frame}{Ejercicios}
+  \begin{enumerate}
+    \item Cambiar $\Pp{E=\text{Yes}\mid\text{Low},\text{Poor}}$ de $0.2$ a $0.4$ y calcular el efecto sobre $\Pp{R=\text{Pass}\mid A=\text{Low},S=\text{Poor}}$, primero a mano y luego con \texttt{pgmpy}.
+    \item Simular 1000 muestras con la red, estimar las CPDs por máxima verosimilitud y compararlas con las originales. Repetir con $n=100$ y con $n=10\,000$.
+    \item Agregar una variable \texttt{PastGrade} (High, Low) como padre de \texttt{Study}. Describir qué cambia en la factorización, en el número de parámetros y en el código.
+  \end{enumerate}
+\end{frame}
+
+% ------------------------------------------------------------------ Solución 1
+\begin{frame}{Solución del ejercicio 1}
+  Sea $s=\Pp{E=\text{Yes}\mid\text{Low},\text{Poor}}$. Con $S=\text{Poor}$, $\Pp{X=\text{Low}\mid\text{Poor}}=0.3$ y $\Pp{X=\text{High}\mid\text{Poor}}=0.7$.
+
+  \medskip
+  \textbf{Paso 1.} Probabilidad de aprobar según si estudió, promediando sobre el estrés:
+  \begin{align*}
+    \Pp{\text{Pass}\mid E=\text{Yes},S=\text{Poor}}&=0.3\cdot0.95+0.7\cdot0.80=0.845,\\
+    \Pp{\text{Pass}\mid E=\text{No},S=\text{Poor}}&=0.3\cdot0.60+0.7\cdot0.10=0.250.
+  \end{align*}
+  \textbf{Paso 2.} Se promedia sobre $E$ con peso $s$:
+  \[
+    \Pp{\text{Pass}\mid\text{Low},\text{Poor}}=0.845\,s+0.250\,(1-s)=0.250+0.595\,s.
+  \]
+  \textbf{Paso 3.} Con $s=0.2$ se obtiene $0.369$; con $s=0.4$ se obtiene $0.488$.
+
+  \medskip
+  El efecto es lineal en $s$ con pendiente $0.595$: subir $s$ en $0.2$ aumenta la probabilidad de aprobar en $0.119$.
+\end{frame}
+
+% ------------------------------------------------------------------ Solución 2
+\begin{frame}[fragile]{Solución del ejercicio 2}
+\begin{lstlisting}
+from pgmpy.sampling import BayesianModelSampling
+
+for n in (100, 1000, 10000):
+    data = BayesianModelSampling(model).forward_sample(size=n, seed=42)
+    learned = DiscreteBayesianNetwork(model.edges())
+    learned.fit(data)
+    print(n)
+    print(learned.get_cpds("Study").values.round(3))
+\end{lstlisting}
+  \small
+  \textbf{Qué esperar y cómo juzgarlo:}
+  \begin{itemize}
+    \item El error estándar de cada entrada es $\sqrt{p(1-p)/N(pa)}$, así que baja como $1/\sqrt{n}$: con $n=10\,000$ debería ser unas tres veces menor que con $n=1000$.
+    \item Las columnas con padres menos frecuentes son las que más se desvían. Con $n=100$ y semilla 42, la combinación (Low, Poor) tiene solo 12 filas (6 con \emph{Yes}) y la estimación es $0.50$, aunque el valor verdadero es $0.20$.
+    \item El arreglo \texttt{values} tiene forma (\texttt{Study}, \texttt{Attendance}, \texttt{Sleep}) y los estados ordenados alfabéticamente: la fila de \emph{No} aparece antes que la de \emph{Yes}.
+  \end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------------ Solución 3
+\begin{frame}{Solución del ejercicio 3 (1/2): estructura y parámetros}
+  Sea $G$ = PastGrade. Se agrega el arco $G\to E$.
+
+  \medskip
+  \textbf{Factorización nueva:}
+  {\small
+  \[
+    \Pp{G,A,S,E,X,R}=\Pp{G}\,\Pp{A}\,\Pp{S}\,\Pp{E\mid G,A,S}\,\Pp{X\mid S}\,\Pp{R\mid E,X}.
+  \]}
+  \textbf{Parámetros:} la CPD de $E$ pasa de 4 a $2\cdot2\cdot2=8$ columnas libres, y se agrega $\Pp{G}$ con 1 parámetro:
+  \[
+    12-4+8+1=17.
+  \]
+  \textbf{Propuesta de valores} que conserva el modelo original cuando $G$ no se observa (con $\Pp{G=\text{High}}=0.5$):
+
+  \small
+  \begin{center}
+  \begin{tabular}{lcccc}
+    \toprule
+    & \multicolumn{4}{c}{$\Pp{E=\text{Yes}\mid G,A,S}$ según $(A,S)$} \\
+    $G$ & (H,G) & (H,P) & (L,G) & (L,P) \\
+    \midrule
+    High & 0.95 & 0.80 & 0.70 & 0.30 \\
+    Low  & 0.85 & 0.60 & 0.50 & 0.10 \\
+    Promedio   & 0.90 & 0.70 & 0.60 & 0.20 \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]{Solución del ejercicio 3 (2/2): código y qué comprobar}
+\begin{lstlisting}
+model2 = DiscreteBayesianNetwork([
+    ("PastGrade", "Study"), ("Attendance", "Study"),
+    ("Sleep", "Study"), ("Sleep", "Stress"),
+    ("Study", "Pass"), ("Stress", "Pass")])
+
+cpd_G = TabularCPD("PastGrade", 2, [[0.5], [0.5]],
+    state_names={"PastGrade": ["High", "Low"]})
+# Columnas: (G,A,S) con G cambiando mas lento, luego A, luego S
+cpd_E2 = TabularCPD("Study", 2,
+    [[0.95, 0.80, 0.70, 0.30, 0.85, 0.60, 0.50, 0.10],
+     [0.05, 0.20, 0.30, 0.70, 0.15, 0.40, 0.50, 0.90]],
+    evidence=["PastGrade", "Attendance", "Sleep"],
+    evidence_card=[2, 2, 2],
+    state_names={"Study": ["Yes", "No"], "PastGrade": ["High", "Low"],
+                 "Attendance": ["High", "Low"], "Sleep": ["Good", "Poor"]})
+# Se mantienen cpd_A, cpd_S, cpd_X, cpd_R; no se reutiliza cpd_E.
+\end{lstlisting}
+  \small
+  \textbf{Qué comprobar:} sin evidencia sobre \texttt{PastGrade}, las consultas de los Ejemplos 1 a 4 deben dar lo mismo que antes. Con \texttt{PastGrade} observada cambian: $\Pp{\text{Pass}\mid\text{High},\text{Good},G=\text{High}}\approx0.899$ y con $G=\text{Low}$, $\approx0.857$.
+\end{frame}
+
+% ------------------------------------------------------------------ Conclusiones
+\begin{frame}{Conclusiones}
+  \begin{itemize}
+    \item Una red bayesiana descompone la conjunta en CPDs locales: aquí 12 parámetros en lugar de 31.
+    \item El grafo determina qué independencias se cumplen; el colisionador muestra que condicionar puede crear dependencia.
+    \item Toda consulta sigue el mismo método: factorizar, fijar la evidencia, sumar lo oculto y normalizar.
+    \item \texttt{pgmpy} automatiza ese cálculo, pero conviene poder reproducirlo a mano en un caso pequeño para verificar el modelo.
+    \item En un problema real, las tablas se estiman de datos y hay que validar la estructura, la estimación y la capacidad predictiva.
+  \end{itemize}
+\end{frame}
+
+% ------------------------------------------------------------------ Referencias
+\begin{frame}{Referencias}
+  \small
+  \begin{itemize}
+    \item Koller, D. y Friedman, N. (2009). \emph{Probabilistic Graphical Models: Principles and Techniques}. MIT Press.
+    \item Ankan, A. y Textor, J. (2024). pgmpy: A Python Toolkit for Bayesian Networks. \emph{Journal of Machine Learning Research}, 25(265), 1--8. \texttt{https://jmlr.org/papers/v25/23-0487.html}
+    \item Documentación de pgmpy: \texttt{https://pgmpy.org}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Preguntas}
+  \centering
+  \Large ¿Preguntas?
+\end{frame}
+
+\end{document}
