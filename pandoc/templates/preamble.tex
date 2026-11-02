@@ -48,6 +48,20 @@ ItalicFont = *-SemiBoldItalic
 \usetikzlibrary{matrix,calc,tikzmark,arrows,shapes,backgrounds}
 \usetikzlibrary{fit, arrows.meta, shapes}        
 
+
+\usepackage{tabularx, booktabs}
+%\let\oldShaded\Shaded
+%\let\endoldShaded\endShaded
+%\renewenvironment{Shaded}{\begin{oldShaded}\scriptsize}{\end{oldShaded}}
+
+
+\usepackage{xcolor,colortbl, transparent}
+\definecolor{col}{rgb}{0.5,0.3,0.1}
+%\newcommand{\col}{\transparent{0.8}\cellcolor{col}} 
+\newcommand{\col}{\cellcolor{col!30}} 
+
+\newcommand{\theHtable}{\thetable}
+
 \setbeamertemplate{title page}[default]
 \addtobeamertemplate{title page}{\thispagestyle{empty}}{}
 
@@ -67,10 +81,4 @@ ItalicFont = *-SemiBoldItalic
       \end{beamercolorbox}}%
       \vskip0pt%
     }
-
-
-%\let\oldShaded\Shaded
-%\let\endoldShaded\endShaded
-%\renewenvironment{Shaded}{\begin{oldShaded}\scriptsize}{\end{oldShaded}}
-
 
