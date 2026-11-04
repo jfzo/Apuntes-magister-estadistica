@@ -20,19 +20,7 @@ graphics: true
 linespread: 1.2
 ---
 
-# Motivación y clasificación por similitud
-
-## Objetivos de la clase
-
-Al finalizar la sesión, el estudiante podrá:
-
-1. Formular la clasificación binaria como un problema de separación geométrica con margen.
-2. Plantear los problemas primal y dual de la SVM de margen máximo e identificar los vectores soporte.
-3. Extender la formulación a margen suave e interpretarla como *hinge loss* más regularización.
-4. Construir fronteras no lineales mediante funciones de kernel (truco del kernel, condición de semidefinición positiva).
-5. Seleccionar $C$ y $\gamma$ mediante validación cruzada y reconocer las limitaciones prácticas del método.
-
-## Planteamiento del problema
+# Planteamiento del problema
 
 Se dispone de $m$ observaciones etiquetadas
 
