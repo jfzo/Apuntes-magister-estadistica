@@ -1,0 +1,101 @@
+{
+ "moons_logreg_test": 0.7777777777777778,
+ "gradcheck_maxrel": 6.972268098555589e-09,
+ "lr": {
+  "0.01": [
+   0.6826632105853743,
+   0.5
+  ],
+  "0.1": [
+   0.4939944295380997,
+   0.7555555555555555
+  ],
+  "1.0": [
+   0.3025689352107877,
+   0.7777777777777778
+  ],
+  "5.0": [
+   0.26100968526016993,
+   0.8222222222222222
+  ]
+ },
+ "batch": {
+  "None": [
+   100,
+   0.3807081286109466,
+   0.7666666666666667
+  ],
+  "32": [
+   700,
+   0.3028595107743554,
+   0.7666666666666667
+  ],
+  "1": [
+   21000,
+   0.11266588926653127,
+   0.9444444444444444
+  ]
+ },
+ "init": {
+  "zeros_acc": 0.5,
+  "rand_acc": 0.7777777777777778,
+  "zeros_cols_equal": true,
+  "zeros_final": 0.6931471805599453,
+  "rand_final": 0.3025689352107877
+ },
+ "moons_hidden": {
+  "1": 0.7777777777777778,
+  "3": 0.9222222222222223,
+  "20": 0.9333333333333333
+ },
+ "xor_logreg_acc": 0.5,
+ "xor_hidden": [
+  [
+   0,
+   1,
+   1,
+   2
+  ],
+  [
+   0,
+   0,
+   0,
+   1
+  ]
+ ],
+ "xor_out": [
+  [
+   0,
+   1,
+   1,
+   0
+  ]
+ ],
+ "digits": {
+  "svm_cv": 0.9864731549990514,
+  "svm_test": 0.9925925925925926,
+  "mlp_best": {
+   "mlpclassifier__alpha": "0.01",
+   "mlpclassifier__hidden_layer_sizes": "(128,)"
+  },
+  "mlp_cv": 0.9753430721558212,
+  "mlp_test": 0.9777777777777777,
+  "grid": {
+   "{'mlpclassifier__alpha': 0.0001, 'mlpclassifier__hidden_layer_sizes': (16,)}": 0.9618,
+   "{'mlpclassifier__alpha': 0.0001, 'mlpclassifier__hidden_layer_sizes': (64,)}": 0.9706,
+   "{'mlpclassifier__alpha': 0.0001, 'mlpclassifier__hidden_layer_sizes': (128,)}": 0.9737,
+   "{'mlpclassifier__alpha': 0.01, 'mlpclassifier__hidden_layer_sizes': (16,)}": 0.9618,
+   "{'mlpclassifier__alpha': 0.01, 'mlpclassifier__hidden_layer_sizes': (64,)}": 0.9706,
+   "{'mlpclassifier__alpha': 0.01, 'mlpclassifier__hidden_layer_sizes': (128,)}": 0.9753,
+   "{'mlpclassifier__alpha': 1.0, 'mlpclassifier__hidden_layer_sizes': (16,)}": 0.9539,
+   "{'mlpclassifier__alpha': 1.0, 'mlpclassifier__hidden_layer_sizes': (64,)}": 0.9618,
+   "{'mlpclassifier__alpha': 1.0, 'mlpclassifier__hidden_layer_sizes': (128,)}": 0.965
+  },
+  "has_class_weight": false,
+  "es": {
+   "n_iter": 42,
+   "best_val": 0.9629629629629629,
+   "test": 0.9574074074074074
+  }
+ }
+}
