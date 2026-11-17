@@ -23,14 +23,6 @@ linespread: 1.2
 
 # Introducción a Redes Neuronales
 
-**Organización**
-
-- Dos visiones de las redes neuronales artificiales (RNA)
-- Origen histórico y el límite del modelo lineal (XOR)
-- Neurona, arquitectura y propagación hacia adelante en notación matricial
-- Funciones de activación y capa de salida
-- Función de costo: entropía cruzada
-- Comparación con la SVM
 
 ## Red de Neuronas Artificiales (RNA)
 
@@ -68,7 +60,7 @@ linespread: 1.2
 \begin{tikzpicture}[remember picture, overlay]
     \node[xshift=4.4cm, yshift=-0.3cm] at (current page.center)
     {
-        \includegraphics[width=0.36\textwidth]{retina-perceptron.png}
+        \includegraphics[width=0.41\textwidth]{retina-perceptron.png}
     };
 \end{tikzpicture}
 
