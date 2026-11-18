@@ -229,7 +229,7 @@ $$F_1=\frac{2\cdot\text{precisión}\cdot\text{recall}}{\text{precisión}+\text{r
 
 ## Ejemplo numérico: *breast cancer*
 
-SVM radial con $C=1$ y $\gamma$ por defecto, variables estandarizadas; 171 casos de prueba, 64 malignos.
+SVM radial con $C=1$ y $\gamma$ por defecto, variables estandarizadas.
 
 | | Predicho maligno | Predicho benigno |
 |:--|:--:|:--:|
